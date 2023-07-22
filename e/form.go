@@ -13,6 +13,7 @@ type FormElement struct {
 	action string
 	method string
 	cb     func(id string, info map[string]string)
+	fileCb func(id, fn string, size int64, data []byte)
 }
 
 var _ easyweb.Event = &FormElement{}
@@ -30,6 +31,11 @@ func (b *FormElement) Action(action string) *FormElement {
 }
 func (b *FormElement) Method(method string) *FormElement {
 	b.method = method
+	return b
+}
+
+func (b *FormElement) SetFileCb(cb func(id, fn string, size int64, data []byte)) *FormElement {
+	b.fileCb = cb
 	return b
 }
 
@@ -85,6 +91,12 @@ func (b *FormElement) MessageCb(id, info string) {
 		var info2 map[string]string
 		json.Unmarshal([]byte(info), &info2)
 		b.cb(id, info2)
+	}
+}
+
+func (b *FormElement) FileCb(id, fn string, size int64, data []byte) {
+	if b.fileCb != nil {
+		b.fileCb(id, fn, size, data)
 	}
 }
 

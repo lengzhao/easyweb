@@ -6,9 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -59,6 +62,7 @@ func RegisterPage(pn PageFunc, path ...string) string {
 	}
 	wssPath := "/wss/" + pid
 	http.HandleFunc(wssPath, page.HandleWs)
+	http.HandleFunc("/wss/"+pid+"/upload/", page.HandleUpload)
 	return wssPath
 }
 
@@ -102,9 +106,8 @@ func (p *pageWs) HandleWs(w http.ResponseWriter, r *http.Request) {
 	defer c.Close()
 	var page easyPage
 	page.conn = c
-	page.callback = make(map[string]MessageCb)
-	page.respChan = make(chan MsgData)
-	page.reqChan = make(chan MsgData, 10)
+	page.callback = make(map[string]EventMsgData)
+	page.msgChan = make(chan any, 10)
 	page.closed = make(chan int)
 	go func() {
 		defer func() {
@@ -114,42 +117,50 @@ func (p *pageWs) HandleWs(w http.ResponseWriter, r *http.Request) {
 		}()
 		p.cb(&page)
 	}()
-	go func() {
-		for {
-			select {
-			case <-page.closed:
-				return
-			case msg, ok := <-page.respChan:
-				if !ok || msg.ID == "" {
-					continue
-				}
-				if msg.Type == "event" {
-					page.callback[msg.ID] = msg.cb
-				}
-				page.conn.WriteMessage(websocket.TextMessage, encode(msg))
-			case msg, ok := <-page.reqChan:
-				if !ok {
-					continue
-				}
-				cb := page.callback[msg.ID]
-				if cb != nil {
-					cb.MessageCb(msg.ID, msg.Msg)
-				}
-			}
-		}
-	}()
+	go page.processMsg()
+	var lastID string
+	var lastFile string
+	var lastSize int64
 	for {
-		_, data, err := c.ReadMessage()
+		msgType, data, err := c.ReadMessage()
+		// fmt.Println("ReadMessage:", msgType, len(data), err)
 		if err != nil {
 			break
 		}
-		var msg MsgData
-		err = json.Unmarshal(data, &msg)
-		if err != nil {
+		if msgType == websocket.TextMessage {
+			var msg FromClientMsgData
+			err = json.Unmarshal(data, &msg)
+			if err != nil {
+				continue
+			}
+			page.msgChan <- msg
 			continue
 		}
-		// log.Println("id:", msg.ID, msg.Type, msg.Msg)
-		page.reqChan <- msg
+		if msgType != websocket.BinaryMessage {
+			continue
+		}
+		if lastFile == "" && bytes.HasPrefix(data[:20], []byte("file:")) {
+			arr := strings.Split(string(data), ":")
+			if len(arr) != 5 {
+				continue
+			}
+			fmt.Println("data:", len(data), string(data), len(string(data)))
+			lastID = arr[1]
+			lastFile = arr[2]
+			lastSize, _ = strconv.ParseInt(arr[3], 10, 64)
+			continue
+		}
+		var msg FileMsgData
+		msg.ID = lastID
+		msg.File = lastFile
+		msg.Size = lastSize
+		msg.BinaryData = data
+		lastFile = ""
+		page.msgChan <- msg
+		if len(data) != int(lastSize) {
+			fmt.Println("FileMsgData,wrong size:", msg.ID, msg.File, "hope size:", msg.Size, "data size:", len(data))
+		}
+
 	}
 	close(page.closed)
 	// fmt.Println("ws disconnect:", r.RemoteAddr)
@@ -162,4 +173,43 @@ func (p *pageWs) HandleHtml(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Fprint(w, p.pageData)
+}
+
+func (p *pageWs) HandleUpload(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		return
+	}
+	fn := path.Clean(r.URL.Path)
+	r.ParseMultipartForm(32 << 20)
+
+	msgInfo := make(map[string]string)
+	for k, v := range r.Form {
+		msgInfo[k] = strings.Join(v, ",")
+	}
+
+	for k := range r.MultipartForm.File {
+		_, fileHeader, err := r.FormFile(k)
+		if err != nil {
+			fmt.Println(k, err)
+			continue
+		}
+		msgInfo[k] = fileHeader.Filename
+	}
+	fData, _ := json.MarshalIndent(msgInfo, "", "  ")
+	fmt.Println("form data:", fn, string(fData))
+
+	file, handler, err := r.FormFile("file1")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+	fmt.Fprintf(w, "%v", handler.Header)
+	f, err := os.OpenFile("./test/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer f.Close()
+	io.Copy(f, file)
 }

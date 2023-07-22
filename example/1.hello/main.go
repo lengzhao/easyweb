@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	easyweb.RegisterPage(func(page easyweb.Page) {
 		page.Title("MyWeb")
 		page.Write(e.Navbar("MyWeb").Write(map[string]string{

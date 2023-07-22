@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gorilla/websocket"
 	"github.com/lengzhao/easyweb/util"
 )
 
@@ -12,21 +13,15 @@ var _ Page = &easyPage{}
 
 func (p *easyPage) Title(title string) Page {
 	id := util.GetCallerID(util.LevelParent)
-	msg := MsgData{id, "title", title, nil}
-	select {
-	case <-p.closed:
-	case p.respChan <- msg:
-	}
+	msg := ToClientMsgData{id, "title", title}
+	p.sendMsg(msg)
 	return p
 }
 
 func (p *easyPage) AddJs(js string) Page {
 	id := util.GetCallerID(util.LevelParent)
-	msg := MsgData{id, "js", js, nil}
-	select {
-	case <-p.closed:
-	case p.respChan <- msg:
-	}
+	msg := ToClientMsgData{id, "js", js}
+	p.sendMsg(msg)
 	return p
 }
 
@@ -36,11 +31,8 @@ func (p *easyPage) GetPeer() string {
 
 func (p *easyPage) AddCss(css string) Page {
 	id := util.GetCallerID(util.LevelParent)
-	msg := MsgData{id, "css", css, nil}
-	select {
-	case <-p.closed:
-	case p.respChan <- msg:
-	}
+	msg := ToClientMsgData{id, "css", css}
+	p.sendMsg(msg)
 	return p
 }
 
@@ -50,19 +42,29 @@ func (p *easyPage) Write(e any) string {
 }
 
 func (p *easyPage) WriteWithID(id string, e any) string {
-	msg := MsgData{id, "", fmt.Sprint(e), nil}
-	msg1 := MsgData{"", "event", "", nil}
+	msg := ToClientMsgData{id, "", fmt.Sprint(e)}
+	p.sendMsg(msg)
 	if event, ok := e.(Event); ok {
+		msg1 := ToClientMsgData{"", "event", ""}
 		msg1.ID, msg1.Msg = event.EventInfo()
-		msg1.cb = event
-	}
-	select {
-	case <-p.closed:
-		return ""
-	case p.respChan <- msg:
-		p.respChan <- msg1
+		p.sendMsg(msg1)
+		msg2 := EventMsgData{}
+		msg2.ID = msg1.ID
+		msg2.E = event
+		if fe, ok := e.(FileEvent); ok {
+			fmt.Println("have filecb:", msg1.ID)
+			msg2.F = fe
+		}
+		p.sendMsg(msg2)
 	}
 	return id
+}
+
+func (p *easyPage) sendMsg(msg any) {
+	select {
+	case <-p.closed:
+	case p.msgChan <- msg:
+	}
 }
 
 func (p *easyPage) Close() {
@@ -83,4 +85,42 @@ func encode(v interface{}) []byte {
 	enc.SetEscapeHTML(false)
 	enc.Encode(v)
 	return []byte(buff.String())
+}
+
+func (p *easyPage) processMsg() {
+	for {
+		select {
+		case <-p.closed:
+			return
+		case data, ok := <-p.msgChan:
+			if !ok {
+				continue
+			}
+			switch msg := data.(type) {
+			case ToClientMsgData:
+				if msg.ID == "" {
+					continue
+				}
+				p.conn.WriteMessage(websocket.TextMessage, encode(msg))
+				if msg.Msg == "" {
+					delete(p.callback, msg.ID)
+				}
+			case FromClientMsgData:
+				cb := p.callback[msg.ID]
+				if cb.E != nil {
+					cb.E.MessageCb(msg.ID, msg.Msg)
+				}
+			case FileMsgData:
+				// fmt.Println("FileMsgData 01:", msg.ID, msg.File, msg.Size)
+				cb := p.callback[msg.ID]
+				if cb.F != nil {
+					cb.F.FileCb(msg.ID, msg.File, msg.Size, msg.BinaryData)
+				}
+			case EventMsgData:
+				p.callback[msg.ID] = msg
+			default:
+				fmt.Println("unknown msg type:", msg)
+			}
+		}
+	}
 }

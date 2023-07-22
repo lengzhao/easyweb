@@ -15,19 +15,36 @@ type Page interface {
 	WaitUntilClosed()
 }
 
-type MsgData struct {
+type ToClientMsgData struct {
 	ID   string `json:"id"`
 	Type string `json:"type"`
 	Msg  string `json:"msg"`
-	cb   Event
+}
+
+type FromClientMsgData struct {
+	ID   string `json:"id"`
+	Type string `json:"type"`
+	Msg  string `json:"msg"`
+}
+
+type FileMsgData struct {
+	ID         string
+	File       string
+	Size       int64
+	BinaryData []byte
+}
+
+type EventMsgData struct {
+	ID string
+	E  Event
+	F  FileEvent
 }
 
 type easyPage struct {
-	callback map[string]MessageCb
+	callback map[string]EventMsgData
 	conn     *websocket.Conn
-	respChan chan MsgData
-	reqChan  chan MsgData
 	closed   chan int
+	msgChan  chan any
 }
 
 type MessageCb interface {
@@ -36,6 +53,10 @@ type MessageCb interface {
 type PageFunc func(page Page)
 
 type Event interface {
+	MessageCb
 	EventInfo() (id, typ string)
-	MessageCb(id, info string)
+}
+
+type FileEvent interface {
+	FileCb(id, fn string, size int64, data []byte)
 }

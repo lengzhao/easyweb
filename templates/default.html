@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.ico">
     <title>EasyWeb</title>
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"
+        integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
@@ -36,7 +37,7 @@
             $("div:first").before(g);
         }
 
-        ws.onmessage = function(e) {
+        ws.onmessage = function (e) {
             var obj = JSON.parse(e.data);
             switch (obj.type) {
                 case "title":
@@ -46,19 +47,11 @@
                     $.getScript(obj.msg);
                     break;
                 case "css":
-                    $.ajax({
-                        url: obj.msg,
-                        dataType: 'text',
-                        success: () => {
-                            $("head").append("<link>");
-                            let css = $("head").children(":last");
-                            css.attr({
-                                rel: "stylesheet",
-                                type: "text/css",
-                                href: obj.msg
-                            });
-                        }
-                    });
+                    g = document.createElement('link');
+                    g.setAttribute("rel", "stylesheet");
+                    g.setAttribute("type", "text/css");
+                    g.setAttribute("href", obj.msg);
+                    $("head").append(g);
                     break
                 case "event":
                     bindEvent(obj.msg, obj.id);
@@ -68,14 +61,10 @@
                     if (element.length > 0) {
                         if (obj.msg == 0) {
                             $("#" + obj.id).remove();
-                            // console.log("删除html")
+                            // console.log("remove element", obj.id)
                             return
                         }
-                        if (obj.type == "label") {
-                            $("#" + obj.id).text(obj.msg)
-                        } else {
-                            $("#" + obj.id).html(obj.msg)
-                        }
+                        $("#" + obj.id).html(obj.msg)
                     } else {
                         g = document.createElement('div');
                         g.setAttribute("id", obj.id);
@@ -90,55 +79,69 @@
             switch (typ) {
                 case "input":
                     $("#" + id).on("input", function () {
-                        var info = {
-                            type: typ,
-                            msg: $(this).val(),
-                            id: id
-                        }
+                        var info = { type: typ, msg: $(this).val(), id: id }
                         ws.send(JSON.stringify(info));
                     });
                     break;
                 case "button":
                     $("#" + id).click(function () {
-                        var info = {
-                            type: "button",
-                            msg: "click",
-                            id: id
-                        }
-                        console.log("click:",info)
+                        var info = { type: "button", msg: "click", id: id }
+                        console.log("click:", info)
                         ws.send(JSON.stringify(info));
                     });
                     break
                 case "form":
-                    $("#" +id).submit(function (event) {
+                    $("#" + id).submit(function (event) {
                         event.preventDefault();
                         const data = new FormData(event.target);
                         const value = Object.fromEntries(data.entries());
-                        console.log("form:", value)
-                        var info = {
-                            type: "form",
-                            msg: JSON.stringify(value),
-                            id: id
+                        var files = [];
+                        for (let x in value) {
+                            if (value[x] instanceof File) {
+                                f = value[x];
+                                files.push(f);
+                                value[x] = f.name;
+                            }
                         }
+                        console.log("form:", value)
+                        var info = { type: "form", msg: JSON.stringify(value), id: id }
+                        // send form data
                         ws.send(JSON.stringify(info));
+                        for (let f of files) {
+                            // send file info and data
+                            ws.send(str2ab("file:" + id + ":" + f.name + ":" + f.size + ":"))
+                            sendFile(f);
+                        }
                         return false;
                     });
                     break
-
                 default:
                     $(id).on(typ, function () {
-                        var info = {
-                            type: typ,
-                            msg: $(this).text(),
-                            id: id
-                        }
+                        var info = { type: typ, msg: $(this).text(), id: id }
                         ws.send(JSON.stringify(info));
                     });
                     break;
             }
         }
-
-
+        function sendFile(file) {
+            var reader = new FileReader();
+            var rawData = new ArrayBuffer();
+            reader.loadend = function () {
+            }
+            reader.onload = function (e) {
+                rawData = e.target.result;
+                ws.send(rawData);
+            }
+            reader.readAsArrayBuffer(file);
+        }
+        function str2ab(str) {
+            var buf = new ArrayBuffer(str.length * 2);
+            var bufView = new Uint8Array(buf);
+            for (var i = 0, strLen = str.length; i < strLen; i++) {
+                bufView[i] = str.charCodeAt(i);
+            }
+            return buf;
+        }
     </script>
 </body>
 

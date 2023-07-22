@@ -9,11 +9,13 @@ type EntryElement struct {
 	name   string
 	prefix string
 	suffix string
+	typ    string
 }
 
 func Entry(name string) *EntryElement {
 	out := &EntryElement{}
 	out.name = name
+	out.typ = "text"
 
 	return out
 }
@@ -27,7 +29,8 @@ func (e *EntryElement) String() string {
 	if e.prefix != "" {
 		node.AddChild(NewNode("span").AddAttribute("class", "input-group-text").SetText(e.prefix))
 	}
-	btn := NewNode("input").AddAttribute("type", "text").AddAttribute("name", e.name).AddAttribute("class", "form-control")
+	btn := NewNode("input").AddAttribute("type", e.typ).AddAttribute("name", e.name).AddAttribute("class", "form-control")
+	btn.AddAttribute("id", "file1")
 	if e.cont != "" {
 		btn.AddAttribute("value", e.cont)
 	}
@@ -41,6 +44,11 @@ func (e *EntryElement) String() string {
 
 func (e *EntryElement) Prefix(in string) *EntryElement {
 	e.prefix = in
+	return e
+}
+
+func (e *EntryElement) SetType(in string) *EntryElement {
+	e.typ = in
 	return e
 }
 
