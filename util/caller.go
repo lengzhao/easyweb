@@ -17,6 +17,10 @@ const (
 	Level5
 )
 
+// GetCallerID returns the caller ID of the function(hash of the function+file+line).
+//
+// It takes a parameter 'skip' of type Level.
+// It returns a string.
 func GetCallerID(skip Level) string {
 	pc, file, lineNo, ok := runtime.Caller(int(skip))
 	if !ok {

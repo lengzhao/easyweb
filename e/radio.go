@@ -1,6 +1,10 @@
 package e
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/lengzhao/easyweb/util"
+)
 
 type RadioElement struct {
 	BaseElement
@@ -9,13 +13,22 @@ type RadioElement struct {
 
 func Radio(name string) *RadioElement {
 	var out RadioElement
+	if name == "" {
+		name = util.GetCallerID(util.LevelParent)
+	}
 	out.name = name
+	out.id = util.GetID()
 	return &out
 }
 
 func (e *RadioElement) String() string {
-
-	return e.cont
+	node := NewNode("div")
+	if e.id != "" {
+		node.AddAttribute("id", e.id)
+	}
+	node.AddAttribute("class", "row")
+	node.SetHtml(e.cont)
+	return node.String()
 }
 
 func (e *RadioElement) Class(in string) *RadioElement {
@@ -34,7 +47,7 @@ func (e *RadioElement) Add(in any) *RadioElement {
 		for k, v := range val {
 			lid := fmt.Sprintf("%s%04d", e.name, len(e.cont))
 			e.cont += `<div class="form-check ` + e.cls + `">`
-			e.cont += `<input class="form-check-input" type="radio" name="` + e.name + `" value="` + v + `" id="` + lid + `">`
+			e.cont += `<input class="form-check-input" type="radio" name="` + e.name + `" value="` + v + `" id="` + lid + `" checked>`
 			e.cont += `<label class="form-check-label" for="` + lid + `">` + k + `</label>`
 			e.cont += `</div>`
 		}

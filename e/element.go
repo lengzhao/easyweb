@@ -1,12 +1,10 @@
 package e
 
 type Element interface {
-	Class(string) Element
-	Write(any) Element
+	// Class(string) Element
+	// Write(any) Element
 	String() string
 	GetID() string
-	GetType() string
-	ElementCb(id, info string)
 }
 
 type BaseElement struct {
@@ -15,14 +13,14 @@ type BaseElement struct {
 	id   string
 }
 
-func (e *BaseElement) SetID(id string) {
-	e.id = id
+func (e *BaseElement) String() string {
+	return ""
 }
 
 func (e BaseElement) GetID() string {
 	return e.id
 }
 
-func (e BaseElement) GetType() string {
-	return ""
+func (e *BaseElement) SetID(id string) {
+	e.id = id
 }

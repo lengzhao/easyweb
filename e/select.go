@@ -1,6 +1,10 @@
 package e
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/lengzhao/easyweb/util"
+)
 
 type SelectElement struct {
 	BaseElement
@@ -9,16 +13,24 @@ type SelectElement struct {
 
 func Select(name string) *SelectElement {
 	var out SelectElement
+	if name == "" {
+		name = util.GetCallerID(util.LevelParent)
+	}
 	out.name = name
+	out.id = util.GetID()
 	return &out
 }
 
 func (e *SelectElement) String() string {
-	out := `<select class="form-select ` + e.cls + `" name="` + e.name + `">`
-	out += e.cont
-	out += `</select>`
+	node := NewNode("select")
+	if e.id != "" {
+		node.AddAttribute("id", e.id)
+	}
+	node.AddAttribute("name", e.name)
+	node.AddAttribute("class", "form-select "+e.cls)
+	node.SetHtml(e.cont)
 
-	return out
+	return node.String()
 }
 
 func (e *SelectElement) Class(in string) *SelectElement {
@@ -36,21 +48,26 @@ func (e *SelectElement) Add(in any) *SelectElement {
 	switch val := in.(type) {
 	case map[string]string:
 		for k, v := range val {
-			e.cont += `<option value="` + v + `">` + k + `</option>`
+			e.cont += NewNode("option").AddAttribute("value", v).SetText(k).String()
 		}
 	case SelectItem:
-		e.cont += `<option value="` + val.Value + `"`
+		node := NewNode("option")
+		node.SetText(val.Text)
 		if val.Selected {
-			e.cont += " selected"
+			node.AddAttribute("selected", "")
 		}
-		e.cont += `>` + val.Text + `</option>`
+		node.AddAttribute("value", val.Value)
+		e.cont += node.String()
+
 	case []SelectItem:
 		for _, v := range val {
-			e.cont += `<option value="` + v.Value + `"`
+			node := NewNode("option")
+			node.SetText(v.Text)
 			if v.Selected {
-				e.cont += " selected"
+				node.AddAttribute("selected", "")
 			}
-			e.cont += `>` + v.Text + `</option>`
+			node.AddAttribute("value", v.Value)
+			e.cont += node.String()
 		}
 	default:
 		e.cont += fmt.Sprint(in)

@@ -9,7 +9,7 @@ like streamlit, can quickly generate a web
 3. The user opens the page, and the page connects to the server through websocket
 4. The server executes the code, dynamically creates elements, and sends them to the client
 5. The elements(First-level) have a unique id, through which to create, update, delete
-6. websocket + jquery + bootstrap
+6. websocket + jquery(3.7.0 local) + bootstrap(5.3.0 cdn)
 
 ## exampel
 
@@ -26,10 +26,10 @@ import (
 )
 
 func main() {
-    easyweb.NewPage(easyweb.IndexPage, func(page easyweb.Page) {
+    easyweb.RegisterPage(func(page easyweb.Page) {
         page.Title("MyWeb")
         page.Write("this is my first ui.")
-    })
+    }, easyweb.DefaultPagePath...)
     http.ListenAndServe(":8080", nil)
 }
 ```

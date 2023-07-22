@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	easyweb.NewPage(easyweb.IndexPage, func(page easyweb.Page) {
+	easyweb.RegisterPage(func(page easyweb.Page) {
 		page.Title("MyWeb")
 		page.Write("<h1>easy clock</h1>")
 		t := time.Tick(time.Second)
@@ -19,7 +19,7 @@ func main() {
 				break
 			}
 		}
-	})
+	}, easyweb.DefaultPagePath...)
 	http.ListenAndServe(":8182", nil)
 
 }

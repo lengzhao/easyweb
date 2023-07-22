@@ -1,6 +1,10 @@
 package e
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/lengzhao/easyweb/util"
+)
 
 type TableElement struct {
 	BaseElement
@@ -12,7 +16,11 @@ type TableElement struct {
 
 func Table(name string) *TableElement {
 	var out TableElement
+	if name == "" {
+		name = util.GetCallerID(util.LevelParent)
+	}
 	out.name = name
+	out.id = util.GetID()
 	return &out
 }
 
@@ -44,6 +52,9 @@ func (e *TableElement) String() string {
 	table := NewNode("table")
 	if e.cls == "" {
 		e.cls = "table-striped table-hover"
+	}
+	if e.id != "" {
+		table.AddAttribute("id", e.id)
 	}
 	table.AddAttribute("class", "table "+e.cls)
 	if e.name != "" {

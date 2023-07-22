@@ -44,6 +44,9 @@ func (b *CardElement) Title(title, subTitle string) *CardElement {
 func (b *CardElement) String() string {
 	node := NewNode("div")
 	node.AddAttribute("class", "card")
+	if b.id != "" {
+		node.AddAttribute("id", b.id)
+	}
 	if b.img != "" {
 		img := NewNode("img").AddAttribute("src", b.img).AddAttribute("class", "card-img-top")
 		node.AddChild(img)

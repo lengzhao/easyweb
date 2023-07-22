@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	easyweb.NewPage(easyweb.IndexPage, func(page easyweb.Page) {
+	easyweb.RegisterPage(func(page easyweb.Page) {
 		page.Title("MyWeb")
 		page.Write(e.Navbar("MyWeb").Write(map[string]string{
 			"Home":     "#",
@@ -26,11 +26,11 @@ func main() {
 		page.Write("fdsfdsfdsfdsfdsfsdfdsfdsfd")
 		page.AddCss("/static/css/format2.css")
 		page.Write(e.Entry("222").Prefix("@AAAA"))
-		page.Write(e.Entry("333").Prefix("@BBB").Suffix("$"))
-		page.Write(e.Button("Click").SetCb(func(id string) {
+		page.Write(e.Entry("333").Prefix("@BBB").Suffix("$$$$"))
+		page.Write(e.Button("Click", func(id string) {
 			fmt.Println("button click001:", id)
 		}))
-	})
+	}, easyweb.DefaultPagePath...)
 	http.ListenAndServe(":8182", nil)
 
 }

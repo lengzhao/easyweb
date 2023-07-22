@@ -3,28 +3,51 @@ package e
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/lengzhao/easyweb"
+	"github.com/lengzhao/easyweb/util"
 )
 
 type FormElement struct {
 	BaseElement
-	cb func(id string, info map[string]string)
+	action string
+	method string
+	cb     func(id string, info map[string]string)
 }
 
-func Form() *FormElement {
+var _ easyweb.Event = &FormElement{}
+
+func Form(cb func(id string, info map[string]string)) *FormElement {
 	var out FormElement
+	out.cb = cb
+	out.id = util.GetID()
 	return &out
 }
 
-func (b *FormElement) GetType() string {
-	return "form"
+func (b *FormElement) Action(action string) *FormElement {
+	b.action = action
+	return b
+}
+func (b *FormElement) Method(method string) *FormElement {
+	b.method = method
+	return b
 }
 
 func (b *FormElement) String() string {
-	var out string
-	out += `<form class="` + b.cls + `">`
-	out += b.cont
-	out += `<button type="submit" class="btn btn-primary">Submit</button></form>`
-	return out
+	node := NewNode("form")
+	if b.id != "" {
+		node.AddAttribute("id", b.id)
+	}
+	if b.action != "" {
+		node.AddAttribute("action", b.action)
+	}
+	if b.method != "" {
+		node.AddAttribute("method", b.method)
+	}
+	node.SetHtml(b.cont)
+	//<button type="submit" class="btn btn-primary">Submit</button>
+	node.AddChild(NewNode("button").AddAttribute("type", "submit").AddAttribute("class", "btn btn-primary").SetText("Submit"))
+	return node.String()
 }
 
 type FormItem struct {
@@ -57,7 +80,7 @@ func (b *FormElement) Add(in any) *FormElement {
 	return b
 }
 
-func (b *FormElement) ElementCb(id, info string) {
+func (b *FormElement) MessageCb(id, info string) {
 	if b.cb != nil {
 		var info2 map[string]string
 		json.Unmarshal([]byte(info), &info2)
@@ -65,7 +88,6 @@ func (b *FormElement) ElementCb(id, info string) {
 	}
 }
 
-func (b *FormElement) SetCb(cb func(id string, info map[string]string)) *FormElement {
-	b.cb = cb
-	return b
+func (b *FormElement) EventInfo() (string, string) {
+	return b.id, string(EventForm)
 }

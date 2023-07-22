@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	easyweb.NewPage(easyweb.IndexPage, func(page easyweb.Page) {
+	easyweb.RegisterPage(func(page easyweb.Page) {
 		page.Title("MyWeb")
 		page.Write("<h1>Table</h1>")
 		table := e.Table("").Header([]string{"First", "Last", "Handle"}).ShowIndex()
@@ -19,7 +19,6 @@ func main() {
 			{"Larry", "the Bird"},
 		})
 		page.Write(table)
-	})
+	}, easyweb.DefaultPagePath...)
 	http.ListenAndServe(":8182", nil)
-
 }

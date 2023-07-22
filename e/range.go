@@ -19,6 +19,7 @@ func RangeInput(name string) *RangeInputElement {
 	var out RangeInputElement
 	out.name = name
 	out.max = 100
+	out.id = util.GetID()
 	return &out
 }
 
@@ -42,10 +43,15 @@ func (b *RangeInputElement) String() string {
 	//<label for="customRange3" class="form-label">Example range</label>
 	//<input type="range" class="form-range" min="0" max="5" step="0.5" id="customRange3">
 	cid := util.GetCallerID(util.LevelParent) + b.name
+	base := NewNode("div")
+	if b.id != "" {
+		base.AddAttribute("id", b.id)
+	}
 	node := NewNode("label")
 	node.SetText(b.cont)
 	node.AddAttribute("class", "form-label")
 	node.AddAttribute("for", cid)
+	base.AddChild(node)
 
 	n2 := NewNode("input")
 	n2.AddAttribute("type", "range")
@@ -63,5 +69,6 @@ func (b *RangeInputElement) String() string {
 	if b.value != "" {
 		n2.AddAttribute("value", b.value)
 	}
-	return node.String() + n2.String()
+	base.AddChild(n2)
+	return base.String()
 }

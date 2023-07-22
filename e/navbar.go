@@ -11,7 +11,7 @@ type NavbarElement struct {
 	name string
 }
 
-// Navbar creates a new NavbarElement with the given name. only one per page.
+// Navbar creates a new NavbarElement with the given name.
 //
 // Parameters:
 // - name: a string representing the name of the NavbarElement.
@@ -20,12 +20,11 @@ type NavbarElement struct {
 // - a pointer to the created NavbarElement.
 func Navbar(name string) *NavbarElement {
 	var out NavbarElement
+	if name == "" {
+		name = util.GetCallerID(util.LevelParent)
+	}
 	out.name = name
 	return &out
-}
-
-func (b *NavbarElement) GetID() string {
-	return util.GetCallerID(util.LevelSelf)
 }
 
 func (b *NavbarElement) String() string {

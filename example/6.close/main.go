@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/lengzhao/easyweb"
 	"github.com/lengzhao/easyweb/e"
@@ -19,6 +20,12 @@ func main() {
 		page.Write(e.Form(func(id string, info map[string]string) {
 			fmt.Println("form data:", info)
 		}).Add(radio).Add(selectItem))
+		page.Write("the websocket will be close in 2 seconds")
+		time.Sleep(2 * time.Second)
+		page.Write("the websocket is closed")
+		page.Close()
+		page.WaitUntilClosed()
+		fmt.Println("finish")
 	}, easyweb.DefaultPagePath...)
 	http.ListenAndServe(":8182", nil)
 

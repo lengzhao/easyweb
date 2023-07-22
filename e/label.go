@@ -2,6 +2,8 @@ package e
 
 import (
 	"fmt"
+
+	"github.com/lengzhao/easyweb/util"
 )
 
 type LabelElement struct {
@@ -11,6 +13,7 @@ type LabelElement struct {
 func Label(text string) *LabelElement {
 	var out LabelElement
 	out.cont = text
+	out.id = util.GetID()
 	return &out
 }
 
@@ -21,6 +24,9 @@ func (b *LabelElement) Write(in any) *LabelElement {
 
 func (b *LabelElement) String() string {
 	node := NewNode("p")
+	if b.id != "" {
+		node.AddAttribute("id", b.id)
+	}
 	node.SetText(b.cont)
 	return node.String()
 }

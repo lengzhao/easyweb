@@ -11,19 +11,22 @@ import (
 
 type AccordionElement struct {
 	BaseElement
-	name string
 }
 
-func Accordion(name string) *AccordionElement {
+func Accordion(id string) *AccordionElement {
 	var out AccordionElement
-	out.name = name + util.GetCallerID(util.LevelParent)
+	if id != "" {
+		out.id = id
+	} else {
+		out.id = util.GetCallerID(util.LevelParent)
+	}
 	return &out
 }
 
 func (e *AccordionElement) String() string {
 	node := NewNode("div")
 	node.AddAttribute("class", "accordion "+e.cls)
-	node.AddAttribute("id", e.name)
+	node.AddAttribute("id", e.id)
 	node.SetHtml(e.cont)
 	return node.String()
 }
@@ -60,8 +63,8 @@ func (e *AccordionElement) Add(in any) *AccordionElement {
 	switch val := in.(type) {
 	case AccordionItem:
 		data := itemData{
-			Name:   e.name,
-			ItemID: e.name + fmt.Sprint(e.cont),
+			Name:   e.id,
+			ItemID: e.id + fmt.Sprint(e.cont),
 			Header: val.Header,
 			Text:   val.Text,
 		}
@@ -76,8 +79,8 @@ func (e *AccordionElement) Add(in any) *AccordionElement {
 	case []AccordionItem:
 		for _, v := range val {
 			data := itemData{
-				Name:   e.name,
-				ItemID: e.name + fmt.Sprint(e.cont),
+				Name:   e.id,
+				ItemID: e.id + fmt.Sprint(e.cont),
 				Header: v.Header,
 				Text:   v.Text,
 			}

@@ -1,5 +1,7 @@
 package e
 
+import "github.com/lengzhao/easyweb/util"
+
 type VideoElement struct {
 	BaseElement
 	title string
@@ -8,6 +10,7 @@ type VideoElement struct {
 func Video(url string) *VideoElement {
 	var out VideoElement
 	out.cont = url
+	out.id = util.GetID()
 	return &out
 }
 
@@ -23,15 +26,13 @@ func (b *VideoElement) Class(in string) *VideoElement {
 }
 
 func (b *VideoElement) String() string {
-	/*
-		<div class="ratio ratio-16x9">
-		  <iframe src="https://www.youtube.com/embed/zpOULjyy-n8?rel=0" title="YouTube video" allowfullscreen></iframe>
-		</div>
-	*/
 	if b.cls == "" {
 		b.cls = "ratio-16x9"
 	}
 	node := NewNode("div").AddAttribute("class", "ratio "+b.cls)
+	if b.id != "" {
+		node.AddAttribute("id", b.id)
+	}
 	node.AddChild(NewNode("iframe").AddAttribute("src", b.cont).AddAttribute("title", b.title).AddAttribute("allowfullscreen", ""))
 	return node.String()
 }

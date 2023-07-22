@@ -17,6 +17,9 @@ func Check(name string) *CheckElement {
 func (e *CheckElement) String() string {
 	node := NewNode("div")
 	node.AddAttribute("class", "form-check "+e.cls)
+	if e.id != "" {
+		node.AddAttribute("id", e.id)
+	}
 	c1 := NewNode("input")
 	c1.AddAttribute("type", "checkbox")
 	c1.AddAttribute("class", "form-check-input")

@@ -1,6 +1,8 @@
 package e
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type EntryElement struct {
 	BaseElement
@@ -17,18 +19,24 @@ func Entry(name string) *EntryElement {
 }
 
 func (e *EntryElement) String() string {
-	out := `<div class="input-group ` + e.cls + `">`
+	node := NewNode("div")
+	node.AddAttribute("class", "input-group "+e.cls)
+	if e.id != "" {
+		node.AddAttribute("id", e.id)
+	}
 	if e.prefix != "" {
-		out += `<span class="input-group-text">` + e.prefix + `</span>`
+		node.AddChild(NewNode("span").AddAttribute("class", "input-group-text").SetText(e.prefix))
 	}
-
-	out += `<input type="text" class="form-control" value="` + e.cont + `" name="` + e.name + `">`
+	btn := NewNode("input").AddAttribute("type", "text").AddAttribute("name", e.name).AddAttribute("class", "form-control")
+	if e.cont != "" {
+		btn.AddAttribute("value", e.cont)
+	}
+	node.AddChild(btn)
 	if e.suffix != "" {
-		out += `<span class="input-group-text">` + e.suffix + `</span>`
+		node.AddChild(NewNode("span").AddAttribute("class", "input-group-text").SetText(e.suffix))
 	}
-	out += `</div>`
 
-	return out
+	return node.String()
 }
 
 func (e *EntryElement) Prefix(in string) *EntryElement {

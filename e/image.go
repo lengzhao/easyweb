@@ -1,5 +1,7 @@
 package e
 
+import "github.com/lengzhao/easyweb/util"
+
 type ImageElement struct {
 	BaseElement
 }
@@ -7,6 +9,7 @@ type ImageElement struct {
 func Image(url string) *ImageElement {
 	var out ImageElement
 	out.cont = url
+	out.id = util.GetID()
 	return &out
 }
 
@@ -26,6 +29,9 @@ func (b *ImageElement) String() string {
 		b.cls = "text-center"
 	}
 	node := NewNode("div").AddAttribute("class", b.cls)
+	if b.id != "" {
+		node.AddAttribute("id", b.id)
+	}
 	node.AddChild(NewNode("img").AddAttribute("src", b.cont).AddAttribute("class", "rounded").AddAttribute("alt", b.cont))
 	return node.String()
 }
