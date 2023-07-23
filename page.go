@@ -44,18 +44,20 @@ func (p *easyPage) Write(e any) string {
 func (p *easyPage) WriteWithID(id string, e any) string {
 	msg := ToClientMsgData{id, "", fmt.Sprint(e)}
 	p.sendMsg(msg)
+	// 1. new element
+	// 2. add event callback(server side)
+	// 3. add client event
 	if event, ok := e.(Event); ok {
-		msg1 := ToClientMsgData{"", "event", ""}
-		msg1.ID, msg1.Msg = event.EventInfo()
-		p.sendMsg(msg1)
-		msg2 := EventMsgData{}
-		msg2.ID = msg1.ID
-		msg2.E = event
+		eMsg := ToClientMsgData{"", "event", ""}
+		eMsg.ID, eMsg.Msg = event.EventInfo()
+		cbMsg := EventMsgData{}
+		cbMsg.ID = eMsg.ID
+		cbMsg.E = event
 		if fe, ok := e.(FileEvent); ok {
-			fmt.Println("have filecb:", msg1.ID)
-			msg2.F = fe
+			cbMsg.F = fe
 		}
-		p.sendMsg(msg2)
+		p.sendMsg(cbMsg)
+		p.sendMsg(eMsg)
 	}
 	return id
 }

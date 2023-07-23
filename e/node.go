@@ -20,14 +20,38 @@ func NewNode(element string) *HtmlNode {
 	}
 }
 
-func (n *HtmlNode) AddAttribute(k, v string) *HtmlNode {
+func (n *HtmlNode) SetAttr(k, v string) *HtmlNode {
+	if n.attributes == nil {
+		n.attributes = make(map[string]string)
+	}
 	n.attributes[k] = v
 	return n
 }
 
-func (n *HtmlNode) AddChild(child *HtmlNode) *HtmlNode {
-	n.child = append(n.child, child)
+func (n *HtmlNode) GetAttr(key string) string {
+	if n.attributes == nil {
+		return ""
+	}
+	return n.attributes[key]
+}
+
+func (n *HtmlNode) AddChild(child ...*HtmlNode) *HtmlNode {
+	n.child = append(n.child, child...)
 	return n
+}
+
+func (n *HtmlNode) GetChild(index ...int) *HtmlNode {
+	out := n
+	for _, i := range index {
+		if i >= len(out.child) {
+			return nil
+		}
+		out = out.child[i]
+		if out == nil {
+			return nil
+		}
+	}
+	return out
 }
 
 func (n *HtmlNode) SetText(text string) *HtmlNode {

@@ -54,25 +54,25 @@ func (e *TableElement) String() string {
 		e.cls = "table-striped table-hover"
 	}
 	if e.id != "" {
-		table.AddAttribute("id", e.id)
+		table.SetAttr("id", e.id)
 	}
-	table.AddAttribute("class", "table "+e.cls)
+	table.SetAttr("class", "table "+e.cls)
 	if e.name != "" {
-		table.AddAttribute("id", e.name)
+		table.SetAttr("id", e.name)
 	}
 	trh := NewNode("tr")
 	if e.showIndex {
-		trh.AddChild(NewNode("th").AddAttribute("scope", "col").SetText("#"))
+		trh.AddChild(NewNode("th").SetAttr("scope", "col").SetText("#"))
 	}
 	for _, v := range e.header {
-		trh.AddChild(NewNode("th").AddAttribute("scope", "col").SetText(v))
+		trh.AddChild(NewNode("th").SetAttr("scope", "col").SetText(v))
 	}
 	table.AddChild(NewNode("thead").AddChild(trh))
 	tBody := NewNode("tbody")
 	for i, it := range e.values {
 		tr := NewNode("tr")
 		if e.showIndex {
-			tr.AddChild(NewNode("th").AddAttribute("scope", "row").SetText(fmt.Sprint(i + 1)))
+			tr.AddChild(NewNode("th").SetAttr("scope", "row").SetText(fmt.Sprint(i + 1)))
 		}
 		for _, v := range it {
 			tr.AddChild(NewNode("td").SetText(fmt.Sprint(v)))

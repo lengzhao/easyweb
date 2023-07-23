@@ -25,8 +25,8 @@ func Accordion(id string) *AccordionElement {
 
 func (e *AccordionElement) String() string {
 	node := NewNode("div")
-	node.AddAttribute("class", "accordion "+e.cls)
-	node.AddAttribute("id", e.id)
+	node.SetAttr("class", "accordion "+e.cls)
+	node.SetAttr("id", e.id)
 	node.SetHtml(e.cont)
 	return node.String()
 }

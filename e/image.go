@@ -28,10 +28,10 @@ func (b *ImageElement) String() string {
 	if b.cls == "" {
 		b.cls = "text-center"
 	}
-	node := NewNode("div").AddAttribute("class", b.cls)
+	node := NewNode("div").SetAttr("class", b.cls)
 	if b.id != "" {
-		node.AddAttribute("id", b.id)
+		node.SetAttr("id", b.id)
 	}
-	node.AddChild(NewNode("img").AddAttribute("src", b.cont).AddAttribute("class", "rounded").AddAttribute("alt", b.cont))
+	node.AddChild(NewNode("img").SetAttr("src", b.cont).SetAttr("class", "rounded").SetAttr("alt", b.cont))
 	return node.String()
 }

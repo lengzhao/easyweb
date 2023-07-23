@@ -25,9 +25,9 @@ func (b *RowElement) Write(in any) *RowElement {
 func (b *RowElement) String() string {
 	node := NewNode("div")
 	if b.id != "" {
-		node.AddAttribute("id", b.id)
+		node.SetAttr("id", b.id)
 	}
-	node.AddAttribute("class", "row "+b.cls)
+	node.SetAttr("class", "row "+b.cls)
 	node.SetText(b.cont)
 	return node.String()
 }

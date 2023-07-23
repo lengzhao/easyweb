@@ -3,6 +3,7 @@ package e
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/lengzhao/easyweb"
 	"github.com/lengzhao/easyweb/util"
@@ -10,10 +11,12 @@ import (
 
 type FormElement struct {
 	BaseElement
-	action string
-	method string
-	cb     func(id string, info map[string]string)
-	fileCb func(id, fn string, size int64, data []byte)
+	action     string
+	method     string
+	enctype    string
+	cb         func(id string, info map[string]string)
+	fileCb     func(id, fn string, size int64, data []byte)
+	closeEvent bool
 }
 
 var _ easyweb.Event = &FormElement{}
@@ -27,6 +30,17 @@ func Form(cb func(id string, info map[string]string)) *FormElement {
 
 func (b *FormElement) Action(action string) *FormElement {
 	b.action = action
+	if b.action != "" {
+		b.closeEvent = true
+	} else {
+		b.closeEvent = false
+	}
+	if b.enctype == "" {
+		b.enctype = "multipart/form-data"
+	}
+	if b.method == "" {
+		b.method = http.MethodPost
+	}
 	return b
 }
 func (b *FormElement) Method(method string) *FormElement {
@@ -42,17 +56,20 @@ func (b *FormElement) SetFileCb(cb func(id, fn string, size int64, data []byte))
 func (b *FormElement) String() string {
 	node := NewNode("form")
 	if b.id != "" {
-		node.AddAttribute("id", b.id)
+		node.SetAttr("id", b.id)
 	}
 	if b.action != "" {
-		node.AddAttribute("action", b.action)
+		node.SetAttr("action", b.action)
 	}
 	if b.method != "" {
-		node.AddAttribute("method", b.method)
+		node.SetAttr("method", b.method)
+	}
+	if b.enctype != "" {
+		node.SetAttr("enctype", b.enctype)
 	}
 	node.SetHtml(b.cont)
 	//<button type="submit" class="btn btn-primary">Submit</button>
-	node.AddChild(NewNode("button").AddAttribute("type", "submit").AddAttribute("class", "btn btn-primary").SetText("Submit"))
+	node.AddChild(NewNode("button").SetAttr("type", "submit").SetAttr("class", "btn btn-primary").SetText("Submit"))
 	return node.String()
 }
 
@@ -101,5 +118,8 @@ func (b *FormElement) FileCb(id, fn string, size int64, data []byte) {
 }
 
 func (b *FormElement) EventInfo() (string, string) {
+	if b.closeEvent {
+		return "", ""
+	}
 	return b.id, string(EventForm)
 }

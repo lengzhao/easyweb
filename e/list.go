@@ -25,9 +25,9 @@ func (b *ListElement) Add(in []any) *ListElement {
 
 func (b *ListElement) String() string {
 	node := NewNode("ul")
-	node.AddAttribute("class", "list-group "+b.cls)
+	node.SetAttr("class", "list-group "+b.cls)
 	for _, v := range b.values {
-		node.AddChild(NewNode("li").AddAttribute("class", "list-group-item").SetHtml(fmt.Sprint(v)))
+		node.AddChild(NewNode("li").SetAttr("class", "list-group-item").SetHtml(fmt.Sprint(v)))
 	}
 	return node.String()
 }

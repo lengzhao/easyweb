@@ -32,9 +32,9 @@ func (b *ButtonElement) String() string {
 	if b.cls == "" {
 		b.cls = "btn-primary"
 	}
-	node.AddAttribute("class", "btn "+b.cls)
+	node.SetAttr("class", "btn "+b.cls)
 	if b.id != "" {
-		node.AddAttribute("id", b.id)
+		node.SetAttr("id", b.id)
 	}
 	node.SetText(b.cont)
 	return node.String()

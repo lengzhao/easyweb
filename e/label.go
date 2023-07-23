@@ -25,7 +25,7 @@ func (b *LabelElement) Write(in any) *LabelElement {
 func (b *LabelElement) String() string {
 	node := NewNode("p")
 	if b.id != "" {
-		node.AddAttribute("id", b.id)
+		node.SetAttr("id", b.id)
 	}
 	node.SetText(b.cont)
 	return node.String()

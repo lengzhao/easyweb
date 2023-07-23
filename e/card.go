@@ -43,29 +43,29 @@ func (b *CardElement) Title(title, subTitle string) *CardElement {
 
 func (b *CardElement) String() string {
 	node := NewNode("div")
-	node.AddAttribute("class", "card")
+	node.SetAttr("class", "card")
 	if b.id != "" {
-		node.AddAttribute("id", b.id)
+		node.SetAttr("id", b.id)
 	}
 	if b.img != "" {
-		img := NewNode("img").AddAttribute("src", b.img).AddAttribute("class", "card-img-top")
+		img := NewNode("img").SetAttr("src", b.img).SetAttr("class", "card-img-top")
 		node.AddChild(img)
 	}
-	body := NewNode("div").AddAttribute("class", "card-body")
+	body := NewNode("div").SetAttr("class", "card-body")
 	if b.title != "" {
-		title := NewNode("h5").AddAttribute("class", "card-title").SetText(b.title)
+		title := NewNode("h5").SetAttr("class", "card-title").SetText(b.title)
 		body.AddChild(title)
 	}
 	if b.subTitle != "" {
-		subTitle := NewNode("p").AddAttribute("class", "card-text").SetText(b.subTitle)
+		subTitle := NewNode("p").SetAttr("class", "card-text").SetText(b.subTitle)
 		body.AddChild(subTitle)
 	}
 	if b.cont != "" {
-		cont := NewNode("p").AddAttribute("class", "card-text").SetText(b.cont)
+		cont := NewNode("p").SetAttr("class", "card-text").SetText(b.cont)
 		body.AddChild(cont)
 	}
 	if b.link != "" {
-		link := NewNode("a").AddAttribute("href", b.link).AddAttribute("class", "btn btn-primary").SetText(b.linkText)
+		link := NewNode("a").SetAttr("href", b.link).SetAttr("class", "btn btn-primary").SetText(b.linkText)
 		body.AddChild(link)
 	}
 	node.AddChild(body)

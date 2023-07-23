@@ -29,10 +29,10 @@ func (b *VideoElement) String() string {
 	if b.cls == "" {
 		b.cls = "ratio-16x9"
 	}
-	node := NewNode("div").AddAttribute("class", "ratio "+b.cls)
+	node := NewNode("div").SetAttr("class", "ratio "+b.cls)
 	if b.id != "" {
-		node.AddAttribute("id", b.id)
+		node.SetAttr("id", b.id)
 	}
-	node.AddChild(NewNode("iframe").AddAttribute("src", b.cont).AddAttribute("title", b.title).AddAttribute("allowfullscreen", ""))
+	node.AddChild(NewNode("iframe").SetAttr("src", b.cont).SetAttr("title", b.title).SetAttr("allowfullscreen", ""))
 	return node.String()
 }

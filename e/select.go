@@ -24,10 +24,10 @@ func Select(name string) *SelectElement {
 func (e *SelectElement) String() string {
 	node := NewNode("select")
 	if e.id != "" {
-		node.AddAttribute("id", e.id)
+		node.SetAttr("id", e.id)
 	}
-	node.AddAttribute("name", e.name)
-	node.AddAttribute("class", "form-select "+e.cls)
+	node.SetAttr("name", e.name)
+	node.SetAttr("class", "form-select "+e.cls)
 	node.SetHtml(e.cont)
 
 	return node.String()
@@ -48,15 +48,15 @@ func (e *SelectElement) Add(in any) *SelectElement {
 	switch val := in.(type) {
 	case map[string]string:
 		for k, v := range val {
-			e.cont += NewNode("option").AddAttribute("value", v).SetText(k).String()
+			e.cont += NewNode("option").SetAttr("value", v).SetText(k).String()
 		}
 	case SelectItem:
 		node := NewNode("option")
 		node.SetText(val.Text)
 		if val.Selected {
-			node.AddAttribute("selected", "")
+			node.SetAttr("selected", "")
 		}
-		node.AddAttribute("value", val.Value)
+		node.SetAttr("value", val.Value)
 		e.cont += node.String()
 
 	case []SelectItem:
@@ -64,9 +64,9 @@ func (e *SelectElement) Add(in any) *SelectElement {
 			node := NewNode("option")
 			node.SetText(v.Text)
 			if v.Selected {
-				node.AddAttribute("selected", "")
+				node.SetAttr("selected", "")
 			}
-			node.AddAttribute("value", v.Value)
+			node.SetAttr("value", v.Value)
 			e.cont += node.String()
 		}
 	default:

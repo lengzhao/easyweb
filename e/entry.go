@@ -22,21 +22,21 @@ func Entry(name string) *EntryElement {
 
 func (e *EntryElement) String() string {
 	node := NewNode("div")
-	node.AddAttribute("class", "input-group "+e.cls)
+	node.SetAttr("class", "input-group "+e.cls)
 	if e.id != "" {
-		node.AddAttribute("id", e.id)
+		node.SetAttr("id", e.id)
 	}
 	if e.prefix != "" {
-		node.AddChild(NewNode("span").AddAttribute("class", "input-group-text").SetText(e.prefix))
+		node.AddChild(NewNode("span").SetAttr("class", "input-group-text").SetText(e.prefix))
 	}
-	btn := NewNode("input").AddAttribute("type", e.typ).AddAttribute("name", e.name).AddAttribute("class", "form-control")
-	btn.AddAttribute("id", "file1")
+	btn := NewNode("input").SetAttr("type", e.typ).SetAttr("name", e.name).SetAttr("class", "form-control")
+	btn.SetAttr("id", "file1")
 	if e.cont != "" {
-		btn.AddAttribute("value", e.cont)
+		btn.SetAttr("value", e.cont)
 	}
 	node.AddChild(btn)
 	if e.suffix != "" {
-		node.AddChild(NewNode("span").AddAttribute("class", "input-group-text").SetText(e.suffix))
+		node.AddChild(NewNode("span").SetAttr("class", "input-group-text").SetText(e.suffix))
 	}
 
 	return node.String()

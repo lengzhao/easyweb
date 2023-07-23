@@ -45,29 +45,29 @@ func (b *RangeInputElement) String() string {
 	cid := util.GetCallerID(util.LevelParent) + b.name
 	base := NewNode("div")
 	if b.id != "" {
-		base.AddAttribute("id", b.id)
+		base.SetAttr("id", b.id)
 	}
 	node := NewNode("label")
 	node.SetText(b.cont)
-	node.AddAttribute("class", "form-label")
-	node.AddAttribute("for", cid)
+	node.SetAttr("class", "form-label")
+	node.SetAttr("for", cid)
 	base.AddChild(node)
 
 	n2 := NewNode("input")
-	n2.AddAttribute("type", "range")
-	n2.AddAttribute("class", "form-range")
+	n2.SetAttr("type", "range")
+	n2.SetAttr("class", "form-range")
 	if b.min > 0 {
-		n2.AddAttribute("min", fmt.Sprint(b.min))
+		n2.SetAttr("min", fmt.Sprint(b.min))
 	}
 	if b.max > 0 {
-		n2.AddAttribute("max", fmt.Sprint(b.max))
+		n2.SetAttr("max", fmt.Sprint(b.max))
 	}
 	if b.step > 0 {
-		n2.AddAttribute("step", fmt.Sprint(b.step))
+		n2.SetAttr("step", fmt.Sprint(b.step))
 	}
-	n2.AddAttribute("id", cid)
+	n2.SetAttr("id", cid)
 	if b.value != "" {
-		n2.AddAttribute("value", b.value)
+		n2.SetAttr("value", b.value)
 	}
 	base.AddChild(n2)
 	return base.String()

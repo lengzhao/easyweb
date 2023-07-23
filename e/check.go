@@ -16,20 +16,20 @@ func Check(name string) *CheckElement {
 
 func (e *CheckElement) String() string {
 	node := NewNode("div")
-	node.AddAttribute("class", "form-check "+e.cls)
+	node.SetAttr("class", "form-check "+e.cls)
 	if e.id != "" {
-		node.AddAttribute("id", e.id)
+		node.SetAttr("id", e.id)
 	}
 	c1 := NewNode("input")
-	c1.AddAttribute("type", "checkbox")
-	c1.AddAttribute("class", "form-check-input")
-	c1.AddAttribute("name", e.name)
+	c1.SetAttr("type", "checkbox")
+	c1.SetAttr("class", "form-check-input")
+	c1.SetAttr("name", e.name)
 	if e.checked {
-		c1.AddAttribute("checked", "")
+		c1.SetAttr("checked", "")
 	}
 	node.AddChild(c1)
 	c2 := NewNode("label")
-	c2.AddAttribute("class", "form-check-label")
+	c2.SetAttr("class", "form-check-label")
 	c2.SetText(e.cont)
 	node.AddChild(c2)
 

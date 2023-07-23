@@ -156,6 +156,7 @@ func (p *pageWs) HandleWs(w http.ResponseWriter, r *http.Request) {
 		msg.Size = lastSize
 		msg.BinaryData = data
 		lastFile = ""
+		lastID = ""
 		page.msgChan <- msg
 		if len(data) != int(lastSize) {
 			fmt.Println("FileMsgData,wrong size:", msg.ID, msg.File, "hope size:", msg.Size, "data size:", len(data))

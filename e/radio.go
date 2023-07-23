@@ -24,9 +24,9 @@ func Radio(name string) *RadioElement {
 func (e *RadioElement) String() string {
 	node := NewNode("div")
 	if e.id != "" {
-		node.AddAttribute("id", e.id)
+		node.SetAttr("id", e.id)
 	}
-	node.AddAttribute("class", "row")
+	node.SetAttr("class", "row")
 	node.SetHtml(e.cont)
 	return node.String()
 }
