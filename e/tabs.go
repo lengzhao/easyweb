@@ -2,8 +2,6 @@ package e
 
 import (
 	"fmt"
-
-	"github.com/lengzhao/easyweb/util"
 )
 
 /*
@@ -21,64 +19,43 @@ import (
 </div>
 */
 
-type TabsElement struct {
-	// BaseElement
-	node *HtmlNode
+type tabsElement struct {
+	HtmlToken
 }
 
-func Tabs() *TabsElement {
-	var out TabsElement
-	out.node = NewNode("div")
-	out.node.SetAttr("id", util.GetID())
-	head := NewNode("nav").SetAttr("role", "tablist").SetAttr("class", "nav nav-tabs")
-	out.node.AddChild(NewNode("nav").AddChild(head))
-	body := NewNode("div").SetAttr("class", "tab-content").SetAttr("id", util.GetID())
-	out.node.AddChild(body)
+func Tabs() *tabsElement {
+	var out tabsElement
+	out.Parse(`<div><nav>
+			<div class="nav nav-tabs" role="tablist">
+			</div></nav>
+		<div class="tab-content">
+		</div></div>`)
+	out.Attr("id", getID())
 
 	return &out
 }
 
-func (b *TabsElement) Add(title string, body any) *TabsElement {
-	head := b.node.GetChild(0, 0)
-	lb := b.node.GetChild(1)
-	first := head.GetChild(0) == nil
-	//<button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Home</button>
-	id := util.GetID()
-	bid := util.GetID()
-	hItem := NewNode("button").SetAttr("id", id).SetAttr("type", "button").SetAttr("role", "tab").SetAttr("aria-controls", bid).SetAttr("data-bs-toggle", "tab")
-	hItem.SetAttr("data-bs-target", "#"+bid)
-	if first {
-		hItem.SetAttr("class", "nav-link active").SetAttr("aria-selected", "true")
-	} else {
-		hItem.SetAttr("class", "nav-link").SetAttr("aria-selected", "false")
-	}
-	hItem.SetText(title)
-
-	//<div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">...</div>
-	bItem := NewNode("div").SetAttr("id", bid).SetAttr("role", "tabpanel").SetAttr("aria-labelledby", id)
-	if first {
-		bItem.SetAttr("class", "tab-pane fade show active")
-	} else {
-		bItem.SetAttr("class", "tab-pane fade")
-	}
-	bItem.SetHtml(fmt.Sprint(body))
-	head.AddChild(hItem)
-	lb.AddChild(bItem)
-
+func (b *tabsElement) Add(title string, body any) *tabsElement {
+	hid := getID()
+	id := getID()
+	hd := parseStringToToken(`<button class="nav-link" id="` + hid + `" data-bs-toggle="tab" data-bs-target="#` + id + `" type="button" role="tab" aria-controls="` + id + `" aria-selected="true">` + title + `</button>`)
+	bd := parseStringToToken(`<div class="tab-pane fade" id="` + id + `" role="tabpanel" aria-labelledby="` + hid + `"></div>`)
+	bd.add(body)
+	b.Traverse(func(ht *HtmlToken) error {
+		if ht.GetAttr("role") == "tablist" {
+			if len(ht.children) == 0 {
+				hd.Attr("class", "nav-link active")
+			}
+			ht.add(hd)
+		}
+		if ht.GetAttr("class") == "tab-content" {
+			if len(ht.children) == 0 {
+				bd.Attr("class", "tab-pane fade show active")
+			}
+			ht.add(bd)
+			return fmt.Errorf("finish")
+		}
+		return nil
+	})
 	return b
-}
-
-func (b *TabsElement) Class(in string) *TabsElement {
-	cls := b.node.GetAttr("class")
-	if cls == "" {
-		cls = in
-	} else {
-		cls += " " + in
-	}
-	b.node.SetAttr("class", cls)
-	return b
-}
-
-func (b *TabsElement) String() string {
-	return b.node.String()
 }

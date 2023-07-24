@@ -106,7 +106,7 @@ func (p *pageWs) HandleWs(w http.ResponseWriter, r *http.Request) {
 	defer c.Close()
 	var page easyPage
 	page.conn = c
-	page.callback = make(map[string]EventMsgData)
+	page.callback = make(map[string]eventMsgData)
 	page.msgChan = make(chan any, 10)
 	page.closed = make(chan int)
 	go func() {
@@ -128,7 +128,7 @@ func (p *pageWs) HandleWs(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		if msgType == websocket.TextMessage {
-			var msg FromClientMsgData
+			var msg fromClientMsgData
 			err = json.Unmarshal(data, &msg)
 			if err != nil {
 				continue
@@ -150,7 +150,7 @@ func (p *pageWs) HandleWs(w http.ResponseWriter, r *http.Request) {
 			lastSize, _ = strconv.ParseInt(arr[3], 10, 64)
 			continue
 		}
-		var msg FileMsgData
+		var msg fileMsgData
 		msg.ID = lastID
 		msg.File = lastFile
 		msg.Size = lastSize
@@ -159,7 +159,7 @@ func (p *pageWs) HandleWs(w http.ResponseWriter, r *http.Request) {
 		lastID = ""
 		page.msgChan <- msg
 		if len(data) != int(lastSize) {
-			fmt.Println("FileMsgData,wrong size:", msg.ID, msg.File, "hope size:", msg.Size, "data size:", len(data))
+			fmt.Println("fileMsgData,wrong size:", msg.ID, msg.File, "hope size:", msg.Size, "data size:", len(data))
 		}
 
 	}

@@ -1,38 +1,50 @@
 package e
 
 import (
-	"fmt"
+	"strings"
 
 	"github.com/lengzhao/easyweb/util"
 )
 
-type RadioElement struct {
-	BaseElement
+type radioElement struct {
+	HtmlToken
 	name string
 }
 
-func Radio(name string) *RadioElement {
-	var out RadioElement
+func Radio(name string) *radioElement {
+	var out radioElement
+	out.Parse("<div></div>")
 	if name == "" {
 		name = util.GetCallerID(util.LevelParent)
 	}
 	out.name = name
-	out.id = util.GetID()
+	out.Attr("id", getID())
 	return &out
 }
 
-func (e *RadioElement) String() string {
-	node := NewNode("div")
-	if e.id != "" {
-		node.SetAttr("id", e.id)
-	}
-	node.SetAttr("class", "row")
-	node.SetHtml(e.cont)
-	return node.String()
+func (e *radioElement) AddItem(value, text string) *radioElement {
+	id := getID()
+	e.add(parseStringToToken(`<div class="form-check">
+	<input class="form-check-input" type="radio" name="` + e.name + `" id="` + id + `" value="` + value + `"/>
+	<label class="form-check-label" for="` + id + `">` + text + `</label>
+  </div>`))
+
+	return e
 }
 
-func (e *RadioElement) Class(in string) *RadioElement {
-	e.cls += " " + in
+// Inline Make items appear inline. Must be called after adding items.
+func (e *radioElement) Inline() *radioElement {
+	e.Traverse(func(ht *HtmlToken) error {
+		if ht.info.Data != "div" {
+			return nil
+		}
+		cls := ht.GetAttr("class")
+		if !strings.Contains(cls, "form-check") {
+			return nil
+		}
+		ht.Attr("class", "form-check form-check-inline")
+		return nil
+	})
 	return e
 }
 
@@ -41,32 +53,20 @@ type RadioItem struct {
 	Text  string
 }
 
-func (e *RadioElement) Add(in any) *RadioElement {
+func (e *radioElement) Add(in any) *radioElement {
 	switch val := in.(type) {
 	case map[string]string:
-		for k, v := range val {
-			lid := fmt.Sprintf("%s%04d", e.name, len(e.cont))
-			e.cont += `<div class="form-check ` + e.cls + `">`
-			e.cont += `<input class="form-check-input" type="radio" name="` + e.name + `" value="` + v + `" id="` + lid + `" checked>`
-			e.cont += `<label class="form-check-label" for="` + lid + `">` + k + `</label>`
-			e.cont += `</div>`
+		for name, text := range val {
+			e.AddItem(name, text)
 		}
 	case []RadioItem:
 		for _, v := range val {
-			lid := fmt.Sprintf("%s%04d", e.name, len(e.cont))
-			e.cont += `<div class="form-check ` + e.cls + `">`
-			e.cont += `<input class="form-check-input" type="radio" name="` + e.name + `" value="` + v.Value + `" id="` + lid + `">`
-			e.cont += `<label class="form-check-label" for="` + lid + `>` + v.Text + `</label>`
-			e.cont += `</div>`
+			e.AddItem(v.Value, v.Text)
 		}
 	case RadioItem:
-		lid := fmt.Sprintf("%s%04d", e.name, len(e.cont))
-		e.cont += `<div class="form-check ` + e.cls + `">`
-		e.cont += `<input class="form-check-input" type="radio" name="` + e.name + `" value="` + val.Value + `" id="` + lid + `">`
-		e.cont += `<label class="form-check-label" for="` + lid + `>` + val.Text + `</label>`
-		e.cont += `</div>`
+		e.AddItem(val.Value, val.Text)
 	default:
-		e.cont += fmt.Sprint(in)
+		e.add(Box(in))
 	}
 	return e
 }

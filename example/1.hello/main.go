@@ -13,23 +13,15 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	easyweb.RegisterPage(func(page easyweb.Page) {
 		page.Title("MyWeb")
-		page.Write(e.Navbar("MyWeb").Write(map[string]string{
-			"Home":     "#",
-			"Features": "#",
-			"Pricing":  "#",
-		}))
-		page.Write("this is my first ui.")
-		for i := 0; i < 10; i++ {
-			time.Sleep(100 * time.Millisecond)
-			e := e.Label("-----").Write(i).Write("***<div>kkk</div>***")
-			page.Write(e)
-		}
-		page.Write("fdsfdsfdsfdsfdsfsdfdsfdsfd")
+		page.Write("<h1>Hello World</h1>")
 		page.AddCss("/static/css/format2.css")
-		page.Write(e.Entry("222").Prefix("@AAAA"))
 		page.Write(e.Entry("333").Prefix("@BBB").Suffix("$$$$"))
+		var count int
 		page.Write(e.Button("Click", func(id string) {
 			fmt.Println("button click001:", id)
+			count++
+			page.Write("button click:" + fmt.Sprint(count))
+			page.Write(time.Now().String())
 		}))
 	}, easyweb.DefaultPagePath...)
 	http.ListenAndServe(":8182", nil)

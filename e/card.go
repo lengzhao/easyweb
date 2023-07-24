@@ -4,70 +4,96 @@ import (
 	"fmt"
 )
 
-type CardElement struct {
-	BaseElement
-	img      string
-	link     string
-	linkText string
-	title    string
-	subTitle string
+type cardElement struct {
+	HtmlToken
 }
 
-func Card(text string) *CardElement {
-	var out CardElement
-	out.cont = text
+func (c cardElement) Data() string {
+	return `<div class="card" style="width: 18rem;">
+	<img src="..." class="card-img-top" alt="..."/>
+	<div class="card-body">
+	  <h5 class="card-title"></h5>
+	  <h6 class="card-subtitle mb-2 text-muted"></h6>
+	  <p class="card-text"></p>
+	  <a href="#" class="btn btn-primary">Go somewhere</a>
+	</div>
+  </div>`
+}
+
+// 通过调用初始化的时候，添加参数，参数类型为ParamItem，包含key和value
+
+func Card1() *cardElement {
+	out := cardElement{}
+	out.Parse(out.Data())
+	out.Traverse(func(ht *HtmlToken) error {
+		switch ht.info.Data {
+		case "img", "a", "p", "h5", "h6":
+			ht.disable = true
+		}
+		return nil
+	})
+	out.Attr("id", getID())
+	out.disable = false
 	return &out
 }
 
-func (b *CardElement) Image(in string) *CardElement {
-	b.img = in
+func (b *cardElement) Image(src, alt string) *cardElement {
+	if src == "" {
+		return b
+	}
+	b.Traverse(func(ht *HtmlToken) error {
+		if ht.info.Data == "img" {
+			ht.Attr("src", src)
+			ht.Attr("alt", alt)
+			ht.disable = false
+			return fmt.Errorf("finish")
+		}
+		return nil
+	})
 	return b
 }
 
-func (b *CardElement) Link(url, text string) *CardElement {
-	b.link = url
-	b.linkText = text
+func (b *cardElement) Title(title, subTitle string) *cardElement {
+	b.Traverse(func(ht *HtmlToken) error {
+		if ht.info.Data == "h5" {
+			ht.text = title
+			ht.children = nil
+			ht.disable = false
+		}
+		if ht.info.Data == "h6" {
+			ht.text = subTitle
+			ht.children = nil
+			ht.disable = false
+			return fmt.Errorf("finish")
+		}
+		return nil
+	})
 	return b
 }
 
-func (b *CardElement) Text(in any) *CardElement {
-	b.cont = fmt.Sprint(in)
+func (b *cardElement) Link(url, text string) *cardElement {
+	b.Traverse(func(ht *HtmlToken) error {
+		if ht.info.Data == "a" {
+			ht.Attr("href", url)
+			ht.text = text
+			ht.children = nil
+			ht.disable = false
+			return fmt.Errorf("finish")
+		}
+		return nil
+	})
 	return b
 }
 
-func (b *CardElement) Title(title, subTitle string) *CardElement {
-	b.title = title
-	b.subTitle = subTitle
+func (b *cardElement) Text(in any) *cardElement {
+	b.Traverse(func(ht *HtmlToken) error {
+		if ht.info.Data == "p" {
+			ht.text = fmt.Sprint(in)
+			ht.children = nil
+			ht.disable = false
+			return fmt.Errorf("finish")
+		}
+		return nil
+	})
 	return b
-}
-
-func (b *CardElement) String() string {
-	node := NewNode("div")
-	node.SetAttr("class", "card")
-	if b.id != "" {
-		node.SetAttr("id", b.id)
-	}
-	if b.img != "" {
-		img := NewNode("img").SetAttr("src", b.img).SetAttr("class", "card-img-top")
-		node.AddChild(img)
-	}
-	body := NewNode("div").SetAttr("class", "card-body")
-	if b.title != "" {
-		title := NewNode("h5").SetAttr("class", "card-title").SetText(b.title)
-		body.AddChild(title)
-	}
-	if b.subTitle != "" {
-		subTitle := NewNode("p").SetAttr("class", "card-text").SetText(b.subTitle)
-		body.AddChild(subTitle)
-	}
-	if b.cont != "" {
-		cont := NewNode("p").SetAttr("class", "card-text").SetText(b.cont)
-		body.AddChild(cont)
-	}
-	if b.link != "" {
-		link := NewNode("a").SetAttr("href", b.link).SetAttr("class", "btn btn-primary").SetText(b.linkText)
-		body.AddChild(link)
-	}
-	node.AddChild(body)
-	return node.String()
 }

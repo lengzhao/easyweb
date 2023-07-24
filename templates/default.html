@@ -100,7 +100,8 @@
                             if (value[x] instanceof File) {
                                 f = value[x];
                                 files.push(f);
-                                value[x] = f.name;
+                                info = {}
+                                value[x] = f.name+":"+f.size;
                             }
                         }
                         console.log("form:", value)

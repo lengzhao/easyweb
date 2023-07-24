@@ -10,53 +10,61 @@ type Page interface {
 	AddCss(string) Page
 	Write(any) string
 	WriteWithID(string, any) string
+	Refresh(e IGetID)
 	GetPeer() string
 	Close()
 	WaitUntilClosed()
+	RegistEvent(id, typ string, cb IMessageCb)
 }
 
-type ToClientMsgData struct {
+type toClientMsgData struct {
 	ID   string `json:"id"`
 	Type string `json:"type"`
 	Msg  string `json:"msg"`
 }
 
-type FromClientMsgData struct {
+type fromClientMsgData struct {
 	ID   string `json:"id"`
 	Type string `json:"type"`
 	Msg  string `json:"msg"`
 }
 
-type FileMsgData struct {
+type fileMsgData struct {
 	ID         string
 	File       string
 	Size       int64
 	BinaryData []byte
 }
 
-type EventMsgData struct {
-	ID string
-	E  Event
-	F  FileEvent
+type eventMsgData struct {
+	ID    string
+	Event IMessageCb
 }
 
 type easyPage struct {
-	callback map[string]EventMsgData
+	callback map[string]eventMsgData
 	conn     *websocket.Conn
 	closed   chan int
 	msgChan  chan any
 }
 
-type MessageCb interface {
-	MessageCb(id, info string)
+type IGetID interface {
+	GetID() string
 }
+
+type IMessageCb interface {
+	MessageCallbackFromFramwork(id string, data []byte) bool
+}
+
 type PageFunc func(page Page)
 
-type Event interface {
-	MessageCb
-	EventInfo() (id, typ string)
-}
+type CbDataType byte
 
-type FileEvent interface {
-	FileCb(id, fn string, size int64, data []byte)
+const (
+	CbDataTypeString CbDataType = iota
+	CbDataTypeBinary
+)
+
+type IEnableRegist interface {
+	RegistEvent(p Page)
 }

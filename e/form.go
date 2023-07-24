@@ -6,71 +6,57 @@ import (
 	"net/http"
 
 	"github.com/lengzhao/easyweb"
-	"github.com/lengzhao/easyweb/util"
 )
 
-type FormElement struct {
-	BaseElement
-	action     string
-	method     string
-	enctype    string
-	cb         func(id string, info map[string]string)
-	fileCb     func(id, fn string, size int64, data []byte)
-	closeEvent bool
+type formElement struct {
+	HtmlToken
+	cb     func(id string, info map[string]string)
+	fileCb func(id string, data []byte)
 }
 
-var _ easyweb.Event = &FormElement{}
+var fromTempData string = `<form>
+<div>
+</div>
+<button type="submit" class="btn btn-primary">Submit</button>
+</form>`
 
-func Form(cb func(id string, info map[string]string)) *FormElement {
-	var out FormElement
+func Form(cb func(id string, info map[string]string)) *formElement {
+	var out formElement
+	out.Parse(fromTempData)
+	out.Attr("id", getID())
 	out.cb = cb
-	out.id = util.GetID()
+	if cb != nil {
+		out.SetCb(func(id string, data []byte) {
+			if data[0] != byte(easyweb.CbDataTypeString) {
+				if out.fileCb != nil {
+					out.fileCb(id, data)
+				}
+				return
+			}
+			info := make(map[string]string)
+			err := json.Unmarshal(data[1:], &info)
+			if err != nil {
+				return
+			}
+			cb(id, info)
+		})
+	}
 	return &out
 }
 
-func (b *FormElement) Action(action string) *FormElement {
-	b.action = action
-	if b.action != "" {
-		b.closeEvent = true
-	} else {
-		b.closeEvent = false
+func (b *formElement) Action(action, enctype string) *formElement {
+	b.Attr("action", action)
+	if enctype == "" {
+		enctype = "multipart/form-data"
 	}
-	if b.enctype == "" {
-		b.enctype = "multipart/form-data"
-	}
-	if b.method == "" {
-		b.method = http.MethodPost
-	}
-	return b
-}
-func (b *FormElement) Method(method string) *FormElement {
-	b.method = method
+	b.Attr("enctype", enctype)
+	b.Attr("method", http.MethodPost)
 	return b
 }
 
-func (b *FormElement) SetFileCb(cb func(id, fn string, size int64, data []byte)) *FormElement {
+func (b *formElement) SetFileCb(cb func(id string, data []byte)) *formElement {
 	b.fileCb = cb
 	return b
-}
-
-func (b *FormElement) String() string {
-	node := NewNode("form")
-	if b.id != "" {
-		node.SetAttr("id", b.id)
-	}
-	if b.action != "" {
-		node.SetAttr("action", b.action)
-	}
-	if b.method != "" {
-		node.SetAttr("method", b.method)
-	}
-	if b.enctype != "" {
-		node.SetAttr("enctype", b.enctype)
-	}
-	node.SetHtml(b.cont)
-	//<button type="submit" class="btn btn-primary">Submit</button>
-	node.AddChild(NewNode("button").SetAttr("type", "submit").SetAttr("class", "btn btn-primary").SetText("Submit"))
-	return node.String()
 }
 
 type FormItem struct {
@@ -79,47 +65,34 @@ type FormItem struct {
 	Text  string
 }
 
-func (b *FormElement) Add(in any) *FormElement {
-	switch val := in.(type) {
-	case map[string]string:
-		for k, v := range val {
-			b.cont += `<div class="input-group ">`
-			b.cont += `<span class="input-group-text">` + v + `</span>`
-			b.cont += `<input type="text" class="form-control" name="` + k + `"></div>`
+func (b *formElement) Add(in any) *formElement {
+	b.Traverse(func(ht *HtmlToken) error {
+		if ht.info.Data != "div" {
+			return nil
 		}
-	case FormItem:
-		b.cont += `<div class="input-group ">`
-		b.cont += `<span class="input-group-text">` + val.Text + `</span>`
-		b.cont += `<input type="text" class="form-control" name="` + val.Name + `" value="` + val.Value + `"></div>`
-	case []FormItem:
-		for _, v := range val {
-			b.cont += `<div class="input-group ">`
-			b.cont += `<span class="input-group-text">` + v.Text + `</span>`
-			b.cont += `<input type="text" class="form-control" name="` + v.Name + `" value="` + v.Value + `"></div>`
+		switch val := in.(type) {
+		case map[string]string:
+			for k, v := range val {
+				ht.text += `<div class="input-group ">`
+				ht.text += `<span class="input-group-text">` + v + `</span>`
+				ht.text += `<input type="text" class="form-control" name="` + k + `"></div>`
+			}
+		case FormItem:
+			ht.text += `<div class="input-group ">`
+			ht.text += `<span class="input-group-text">` + val.Text + `</span>`
+			ht.text += `<input type="text" class="form-control" name="` + val.Name + `" value="` + val.Value + `"></div>`
+		case []FormItem:
+			for _, v := range val {
+				ht.text += `<div class="input-group ">`
+				ht.text += `<span class="input-group-text">` + v.Text + `</span>`
+				ht.text += `<input type="text" class="form-control" name="` + v.Name + `" value="` + v.Value + `"></div>`
+			}
+		case *HtmlToken:
+			ht.add(in)
+		default:
+			ht.add(Box(in))
 		}
-	default:
-		b.cont += fmt.Sprint(in)
-	}
+		return fmt.Errorf("finish")
+	})
 	return b
-}
-
-func (b *FormElement) MessageCb(id, info string) {
-	if b.cb != nil {
-		var info2 map[string]string
-		json.Unmarshal([]byte(info), &info2)
-		b.cb(id, info2)
-	}
-}
-
-func (b *FormElement) FileCb(id, fn string, size int64, data []byte) {
-	if b.fileCb != nil {
-		b.fileCb(id, fn, size, data)
-	}
-}
-
-func (b *FormElement) EventInfo() (string, string) {
-	if b.closeEvent {
-		return "", ""
-	}
-	return b.id, string(EventForm)
 }

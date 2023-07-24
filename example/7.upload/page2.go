@@ -26,9 +26,9 @@ func page2() {
 		form := e.Form(func(id string, info map[string]string) {
 			log.Panicln("hope not any event")
 		})
-		form.SetID("")
-		form.Add(fileInput).Action(uploadPath)
-		form.SetFileCb(func(id, fn string, size int64, data []byte) {
+		form.Attr("id", "")
+		form.Add(fileInput).Action(uploadPath, "")
+		form.SetFileCb(func(id string, data []byte) {
 			log.Panicln("hope not any file")
 		})
 		page.Write(form)

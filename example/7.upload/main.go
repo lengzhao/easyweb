@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/lengzhao/easyweb"
 	"github.com/lengzhao/easyweb/e"
@@ -24,9 +23,9 @@ func main() {
 			page.Write(e.Label("receive form data:").Write(info))
 		})
 		form.Add(fileInput)
-		form.SetFileCb(func(id, fn string, size int64, data []byte) {
-			fmt.Println("FileCb", id, fn, size, len(data))
-			page.WriteWithID(statID, e.Label("stat:finish. file:"+fn+" size:"+strconv.FormatInt(size, 10)+" bytes"))
+		form.SetFileCb(func(id string, data []byte) {
+			fmt.Println("FileCb", id, len(data))
+			page.WriteWithID(statID, e.Label(fmt.Sprintf("receive file. id: %s. size:%d", id, len(data))))
 		})
 		page.Write(form)
 		statID = page.Write(e.Label("stat:"))

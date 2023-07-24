@@ -13,14 +13,14 @@ var _ Page = &easyPage{}
 
 func (p *easyPage) Title(title string) Page {
 	id := util.GetCallerID(util.LevelParent)
-	msg := ToClientMsgData{id, "title", title}
+	msg := toClientMsgData{id, "title", title}
 	p.sendMsg(msg)
 	return p
 }
 
 func (p *easyPage) AddJs(js string) Page {
 	id := util.GetCallerID(util.LevelParent)
-	msg := ToClientMsgData{id, "js", js}
+	msg := toClientMsgData{id, "js", js}
 	p.sendMsg(msg)
 	return p
 }
@@ -31,7 +31,7 @@ func (p *easyPage) GetPeer() string {
 
 func (p *easyPage) AddCss(css string) Page {
 	id := util.GetCallerID(util.LevelParent)
-	msg := ToClientMsgData{id, "css", css}
+	msg := toClientMsgData{id, "css", css}
 	p.sendMsg(msg)
 	return p
 }
@@ -42,24 +42,31 @@ func (p *easyPage) Write(e any) string {
 }
 
 func (p *easyPage) WriteWithID(id string, e any) string {
-	msg := ToClientMsgData{id, "", fmt.Sprint(e)}
+	msg := toClientMsgData{id, "", fmt.Sprint(e)}
 	p.sendMsg(msg)
-	// 1. new element
-	// 2. add event callback(server side)
-	// 3. add client event
-	if event, ok := e.(Event); ok {
-		eMsg := ToClientMsgData{"", "event", ""}
-		eMsg.ID, eMsg.Msg = event.EventInfo()
-		cbMsg := EventMsgData{}
-		cbMsg.ID = eMsg.ID
-		cbMsg.E = event
-		if fe, ok := e.(FileEvent); ok {
-			cbMsg.F = fe
-		}
-		p.sendMsg(cbMsg)
-		p.sendMsg(eMsg)
+	if e, ok := e.(IEnableRegist); ok {
+		e.RegistEvent(p)
 	}
 	return id
+}
+
+func (p *easyPage) RegistEvent(id, typ string, cb IMessageCb) {
+	if id == "" || typ == "" {
+		return
+	}
+	// 1. add event callback(server side)
+	cbMsg := eventMsgData{}
+	cbMsg.ID = id
+	cbMsg.Event = cb
+	p.sendMsg(cbMsg)
+	// 2. add client event(jquery will handle the event)
+	toClient := toClientMsgData{id, "event", typ}
+	p.sendMsg(toClient)
+}
+
+func (p *easyPage) Refresh(e IGetID) {
+	id := e.GetID()
+	p.WriteWithID(id, e)
 }
 
 func (p *easyPage) sendMsg(msg any) {
@@ -99,7 +106,7 @@ func (p *easyPage) processMsg() {
 				continue
 			}
 			switch msg := data.(type) {
-			case ToClientMsgData:
+			case toClientMsgData:
 				if msg.ID == "" {
 					continue
 				}
@@ -107,18 +114,21 @@ func (p *easyPage) processMsg() {
 				if msg.Msg == "" {
 					delete(p.callback, msg.ID)
 				}
-			case FromClientMsgData:
+			case fromClientMsgData:
 				cb := p.callback[msg.ID]
-				if cb.E != nil {
-					cb.E.MessageCb(msg.ID, msg.Msg)
+				if cb.Event != nil {
+					out := []byte{byte(CbDataTypeString)}
+					out = append(out, []byte(msg.Msg)...)
+					cb.Event.MessageCallbackFromFramwork(msg.ID, out)
 				}
-			case FileMsgData:
-				// fmt.Println("FileMsgData 01:", msg.ID, msg.File, msg.Size)
+			case fileMsgData:
 				cb := p.callback[msg.ID]
-				if cb.F != nil {
-					cb.F.FileCb(msg.ID, msg.File, msg.Size, msg.BinaryData)
+				if cb.Event != nil {
+					out := []byte{byte(CbDataTypeBinary)}
+					out = append(out, msg.BinaryData...)
+					cb.Event.MessageCallbackFromFramwork(msg.ID, out)
 				}
-			case EventMsgData:
+			case eventMsgData:
 				p.callback[msg.ID] = msg
 			default:
 				fmt.Println("unknown msg type:", msg)
