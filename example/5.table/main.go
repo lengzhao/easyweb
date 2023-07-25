@@ -11,8 +11,8 @@ func main() {
 	easyweb.RegisterPage(func(page easyweb.Page) {
 		page.Title("MyWeb")
 		page.Write("<h1>Table</h1>")
-		table := e.Table("").Header([]string{"First", "Last", "Handle"}).ShowIndex()
-		table.SetValue([][]any{
+		table := e.Table("First", "Last", "Handle").BoldFirstRow()
+		table.AddValue([][]any{
 			{"Mark", "Otto", "@mdo"},
 			{"Jacob", "Thornton", "@fat"},
 			{"Larry", "the Bird", "@twitter"},

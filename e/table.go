@@ -40,6 +40,14 @@ func (e *tableElement) AddItem(in []any) *tableElement {
 	return e
 }
 
+func (e *tableElement) AddValue(in [][]any) *tableElement {
+	for _, it := range in {
+		e.AddItem(it)
+	}
+
+	return e
+}
+
 func (e *tableElement) BoldFirstRow() *tableElement {
 
 	e.Traverse(func(ht *HtmlToken) error {
