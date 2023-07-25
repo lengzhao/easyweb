@@ -1,38 +1,33 @@
 package e
 
-import "github.com/lengzhao/easyweb/util"
-
-type VideoElement struct {
-	BaseElement
-	title string
+type videoElement struct {
+	HtmlToken
 }
 
-func Video(url string) *VideoElement {
-	var out VideoElement
-	out.cont = url
-	out.id = util.GetID()
+func Video(url string) *videoElement {
+	var out videoElement
+	out.parseText(`<div class="embed-responsive embed-responsive-16by9">
+	<iframe class="embed-responsive-item" src="` + url + `" allowfullscreen></iframe>
+  </div>`)
+	out.Attr("id", getID())
 	return &out
 }
 
-func (b *VideoElement) SetTitle(in string) *VideoElement {
-	b.title = in
-	return b
+func (e *videoElement) Aspect21by9() *videoElement {
+	e.Attr("class", "embed-responsive embed-responsive-21by9")
+	return e
+}
+func (e *videoElement) Aspect4by3() *videoElement {
+	e.Attr("class", "embed-responsive embed-responsive-4by3")
+	return e
 }
 
-// ratio-1x1,ratio-4x3,ratio-16x9,ratio-21x9
-func (b *VideoElement) Class(in string) *VideoElement {
-	b.cls += in
-	return b
+func (e *videoElement) Aspect1by1() *videoElement {
+	e.Attr("class", "embed-responsive embed-responsive-1by1")
+	return e
 }
 
-func (b *VideoElement) String() string {
-	if b.cls == "" {
-		b.cls = "ratio-16x9"
-	}
-	node := NewNode("div").SetAttr("class", "ratio "+b.cls)
-	if b.id != "" {
-		node.SetAttr("id", b.id)
-	}
-	node.AddChild(NewNode("iframe").SetAttr("src", b.cont).SetAttr("title", b.title).SetAttr("allowfullscreen", ""))
-	return node.String()
+func (e *videoElement) Aspect16by9() *videoElement {
+	e.Attr("class", "embed-responsive embed-responsive-16by9")
+	return e
 }

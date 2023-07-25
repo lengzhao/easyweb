@@ -1,85 +1,57 @@
 package e
 
-import (
-	"fmt"
+import "fmt"
 
-	"github.com/lengzhao/easyweb/util"
-)
-
-type TableElement struct {
-	BaseElement
-	name      string
-	header    []string
-	values    [][]any
-	showIndex bool
+type tableElement struct {
+	HtmlToken
 }
 
-func Table(name string) *TableElement {
-	var out TableElement
-	if name == "" {
-		name = util.GetCallerID(util.LevelParent)
-	}
-	out.name = name
-	out.id = util.GetID()
+func Table(head ...string) *tableElement {
+	var out tableElement
+	out.parseText(`<table class="table table-bordered table-striped">
+	<thead>
+	  <tr>
+	  </tr>
+	</thead>
+	<tbody>
+	</tbody>
+  </table>`)
+	out.Traverse(func(ht *HtmlToken) error {
+		if ht.info.Data != "tr" {
+			return nil
+		}
+		for _, v := range head {
+			ht.add(`<th scope="col">` + v + `</th>`)
+		}
+		return nil
+	})
+	out.Attr("id", getID())
 	return &out
 }
 
-func (e *TableElement) Class(in string) *TableElement {
-	e.cls += " " + in
-	return e
-}
-func (e *TableElement) Header(in []string) *TableElement {
-	e.header = in
-	return e
-}
-
-type TableItem struct {
-	Value string
-	Text  string
-}
-
-func (e *TableElement) SetValue(in [][]any) *TableElement {
-	e.values = in
+func (e *tableElement) AddItem(in []any) *tableElement {
+	tr, _ := ParseHtml(`<tr></tr>`)
+	for _, v := range in {
+		td, _ := ParseHtml(`<td></td>`)
+		td.add(v)
+		tr.add(td)
+	}
+	e.children[1].add(tr)
 	return e
 }
 
-func (e *TableElement) ShowIndex() *TableElement {
-	e.showIndex = true
-	return e
-}
+func (e *tableElement) BoldFirstRow() *tableElement {
 
-func (e *TableElement) String() string {
-	table := NewNode("table")
-	if e.cls == "" {
-		e.cls = "table-striped table-hover"
-	}
-	if e.id != "" {
-		table.SetAttr("id", e.id)
-	}
-	table.SetAttr("class", "table "+e.cls)
-	if e.name != "" {
-		table.SetAttr("id", e.name)
-	}
-	trh := NewNode("tr")
-	if e.showIndex {
-		trh.AddChild(NewNode("th").SetAttr("scope", "col").SetText("#"))
-	}
-	for _, v := range e.header {
-		trh.AddChild(NewNode("th").SetAttr("scope", "col").SetText(v))
-	}
-	table.AddChild(NewNode("thead").AddChild(trh))
-	tBody := NewNode("tbody")
-	for i, it := range e.values {
-		tr := NewNode("tr")
-		if e.showIndex {
-			tr.AddChild(NewNode("th").SetAttr("scope", "row").SetText(fmt.Sprint(i + 1)))
+	e.Traverse(func(ht *HtmlToken) error {
+		if ht.info.Data != "tbody" {
+			return nil
 		}
-		for _, v := range it {
-			tr.AddChild(NewNode("td").SetText(fmt.Sprint(v)))
+		for _, it := range ht.children {
+			it.children[0].info.Data = "th"
+			it.children[0].Attr("scope", "row")
 		}
-		tBody.AddChild(tr)
-	}
-	table.AddChild(tBody)
 
-	return table.String()
+		return fmt.Errorf("finish")
+	})
+	return e
 }

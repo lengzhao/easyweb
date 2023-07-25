@@ -22,11 +22,11 @@ var fromTempData string = `<form>
 
 func Form(cb func(id string, info map[string]string)) *formElement {
 	var out formElement
-	out.Parse(fromTempData)
+	out.parseText(fromTempData)
 	out.Attr("id", getID())
 	out.cb = cb
 	if cb != nil {
-		out.SetCb(func(id string, data []byte) {
+		out.SetCb("", func(id string, data []byte) {
 			if data[0] != byte(easyweb.CbDataTypeString) {
 				if out.fileCb != nil {
 					out.fileCb(id, data)
@@ -65,33 +65,48 @@ type FormItem struct {
 	Text  string
 }
 
+func (b *formElement) AddInput(name, text string) *formElement {
+	item := InputGroup(name, text)
+	b.Traverse(func(ht *HtmlToken) error {
+		if ht.info.Data != "div" {
+			return nil
+		}
+		ht.add(item)
+		return nil
+	})
+	return b
+}
+
 func (b *formElement) Add(in any) *formElement {
 	b.Traverse(func(ht *HtmlToken) error {
 		if ht.info.Data != "div" {
 			return nil
 		}
 		switch val := in.(type) {
-		case map[string]string:
-			for k, v := range val {
-				ht.text += `<div class="input-group ">`
-				ht.text += `<span class="input-group-text">` + v + `</span>`
-				ht.text += `<input type="text" class="form-control" name="` + k + `"></div>`
-			}
-		case FormItem:
-			ht.text += `<div class="input-group ">`
-			ht.text += `<span class="input-group-text">` + val.Text + `</span>`
-			ht.text += `<input type="text" class="form-control" name="` + val.Name + `" value="` + val.Value + `"></div>`
-		case []FormItem:
+		case []iSelf:
 			for _, v := range val {
-				ht.text += `<div class="input-group ">`
-				ht.text += `<span class="input-group-text">` + v.Text + `</span>`
-				ht.text += `<input type="text" class="form-control" name="` + v.Name + `" value="` + v.Value + `"></div>`
+				ht.add(v.Self())
 			}
-		case *HtmlToken:
-			ht.add(in)
+		case iSelf:
+			ht.add(val.Self())
 		default:
-			ht.add(Box(in))
+			ht.add(in)
 		}
+		return fmt.Errorf("finish")
+	})
+	return b
+}
+
+func (b *formElement) SetButtonText(text string) *formElement {
+	b.Traverse(func(ht *HtmlToken) error {
+		if ht.info.Data != "button" {
+			return nil
+		}
+		if ht.GetAttr("type") != "submit" {
+			return nil
+		}
+		ht.children = nil
+		ht.text = text
 		return fmt.Errorf("finish")
 	})
 	return b

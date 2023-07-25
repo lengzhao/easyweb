@@ -26,7 +26,7 @@ func TestHtmlToken_Parse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			n := &HtmlToken{}
-			n.Parse(tt.text)
+			n.parseText(tt.text)
 			got := n.String()
 			if got != tt.want {
 				t.Errorf("name:%s, Parse() = %s, want %s", tt.name, got, tt.want)

@@ -21,7 +21,7 @@ func page2() {
 		page.Write("<h3>Will upload file and save it to ./test/ on server</h3>")
 		page.Write(e.Link("home", "/"))
 
-		fileInput := e.Entry("file1").SetType("file").Prefix("File")
+		fileInput := e.InputGroup("file1", "File").ChangeType("file")
 
 		form := e.Form(func(id string, info map[string]string) {
 			log.Panicln("hope not any event")

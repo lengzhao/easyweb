@@ -14,28 +14,36 @@ import (
 type ICallback func(id string, data []byte)
 
 type HtmlToken struct {
-	info     html.Token
-	children []*HtmlToken
-	text     string
-	cb       ICallback
-	disable  bool
+	info      html.Token
+	children  []*HtmlToken
+	text      string
+	eventType string
+	cb        ICallback
+	disable   bool
 }
 
-func parseStringToToken(text string) *HtmlToken {
+func ParseHtml(text string) (*HtmlToken, error) {
 	var out HtmlToken
-	out.Parse(text)
-	return &out
+	err := out.parseText(text)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
-func (n *HtmlToken) Parse(text string) {
+func (n *HtmlToken) parseText(text string) error {
 	tkn := html.NewTokenizer(strings.NewReader(text))
 	err := n.parse(tkn)
-	if err != nil || len(n.children) == 0 {
+	if err != nil {
+		return err
+	}
+	if len(n.children) == 0 {
 		log.Println("fail to parse:", err)
 		n.children = nil
 	} else if n.info.Data == "" && n.text == "" {
 		*n = *n.children[0]
 	}
+	return nil
 }
 
 func (n *HtmlToken) parse(tkn *html.Tokenizer) error {
@@ -49,6 +57,9 @@ func (n *HtmlToken) parse(tkn *html.Tokenizer) error {
 			child := &HtmlToken{}
 			child.info = tkn.Token()
 			n.children = append(n.children, child)
+			if child.info.Data == "input" {
+				continue
+			}
 			child.parse(tkn)
 		case html.SelfClosingTagToken:
 			child := &HtmlToken{}
@@ -96,6 +107,10 @@ func (n *HtmlToken) String() string {
 	return out
 }
 
+func (n *HtmlToken) GetID() string {
+	return n.GetAttr("id")
+}
+
 // get Attribute
 func (n *HtmlToken) GetAttr(k string) string {
 	for _, it := range n.info.Attr {
@@ -111,14 +126,16 @@ func (n *HtmlToken) GetAttr(k string) string {
 
 // set Attribute
 func (n *HtmlToken) Attr(k, v string) *HtmlToken {
-	for i, it := range n.info.Attr {
-		if it.Key == k {
-			it.Val = v
-			n.info.Attr[i] = it
-			return n
+	attr := []html.Attribute{}
+	if v != "" {
+		attr = append(attr, html.Attribute{Key: k, Val: v})
+	}
+	for _, it := range n.info.Attr {
+		if it.Key != k {
+			attr = append(attr, it)
 		}
 	}
-	n.info.Attr = append(n.info.Attr, html.Attribute{Key: k, Val: v})
+	n.info.Attr = attr
 	return n
 }
 
@@ -133,8 +150,9 @@ func (n *HtmlToken) add(in ...any) *HtmlToken {
 		case iSelf:
 			n.children = append(n.children, val.Self())
 		default:
-			fmt.Println("add:", it)
-			n.text += fmt.Sprint(it)
+			item := HtmlToken{}
+			item.text = fmt.Sprint(it)
+			n.children = append(n.children, &item)
 		}
 	}
 	return n
@@ -146,29 +164,16 @@ type iSelf interface {
 
 var _ iSelf = &HtmlToken{}
 
-// Set sets the value(children/text) of the HtmlToken.
-func (n *HtmlToken) Set(in any) *HtmlToken {
-	switch val := in.(type) {
-	case []iSelf:
-		n.children = nil
-		for _, it := range val {
-			n.children = append(n.children, it.Self())
-		}
-	case iSelf:
-		n.children = []*HtmlToken{val.Self()}
-	default:
-		n.text = fmt.Sprint(in)
+func (n *HtmlToken) SetCb(typ string, cb ICallback) *HtmlToken {
+	if typ == "" {
+		typ = getEventType2(n.info.Data)
 	}
-
-	return n
-}
-
-func (n *HtmlToken) SetCb(cb ICallback) *HtmlToken {
+	n.eventType = typ
 	n.cb = cb
 	if n.GetAttr("id") == "" {
 		n.Attr("id", util.GetID())
 	}
-	fmt.Println("set event callback:", n.GetAttr("id"), n.info.Data, n.cb)
+	// fmt.Println("set event callback:", n.GetAttr("id"), n.info.Data, n.cb)
 	return n
 }
 
@@ -178,9 +183,9 @@ func (n *HtmlToken) Self() *HtmlToken {
 }
 
 func (n *HtmlToken) RegistEvent(p easyweb.Page) {
-	fmt.Println("try regist event:", n.GetAttr("id"), n.info.Data, n.cb)
+	// fmt.Println("try regist event:", n.GetAttr("id"), n.info.Data, n.cb)
 	if n.cb != nil && n.GetAttr("id") != "" {
-		p.RegistEvent(n.GetAttr("id"), getEventType2(n.info.Data), n)
+		p.RegistEvent(n.GetAttr("id"), n.eventType, n)
 	}
 	for _, child := range n.children {
 		child.RegistEvent(p)

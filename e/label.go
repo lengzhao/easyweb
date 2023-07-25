@@ -1,32 +1,35 @@
 package e
 
 import (
+	"bytes"
 	"fmt"
-
-	"github.com/lengzhao/easyweb/util"
+	"html/template"
 )
 
-type LabelElement struct {
-	BaseElement
+type labelElement struct {
+	HtmlToken
 }
 
-func Label(text string) *LabelElement {
-	var out LabelElement
-	out.cont = text
-	out.id = util.GetID()
+func Label(text string) *labelElement {
+	out := labelElement{}
+	out.parseText(`<div></div>`)
+	out.Attr("id", getID())
+	out.text = text
 	return &out
 }
 
-func (b *LabelElement) Write(in any) *LabelElement {
-	b.cont += fmt.Sprint(in)
-	return b
+func (e *labelElement) Set(text any) *labelElement {
+	e.text = fmt.Sprint(text)
+	buff := new(bytes.Buffer)
+	template.HTMLEscape(buff, []byte(e.text))
+	e.text = buff.String()
+	return e
 }
 
-func (b *LabelElement) String() string {
-	node := NewNode("p")
-	if b.id != "" {
-		node.SetAttr("id", b.id)
-	}
-	node.SetText(b.cont)
-	return node.String()
+func (e *labelElement) Add(text any) *labelElement {
+	e.text += fmt.Sprint(text)
+	buff := new(bytes.Buffer)
+	template.HTMLEscape(buff, []byte(e.text))
+	e.text = buff.String()
+	return e
 }

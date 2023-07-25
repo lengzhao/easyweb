@@ -1,33 +1,31 @@
 package e
 
-import (
-	"fmt"
-
-	"github.com/lengzhao/easyweb/util"
-)
-
-type ListElement struct {
-	BaseElement
-	values []any
+type listElement struct {
+	HtmlToken
 }
 
-func List(in []any) *ListElement {
-	var out ListElement
-	out.id = util.GetID()
-	out.values = append(out.values, in...)
+func List(in ...any) *listElement {
+	var out listElement
+	out.parseText(`<ul class="list-group"></ul>`)
+	out.Add(in...)
 	return &out
 }
 
-func (b *ListElement) Add(in []any) *ListElement {
-	b.values = append(b.values, in...)
-	return b
+func (e *listElement) ShowIndex() *listElement {
+	e.Attr("class", e.GetAttr("class")+" list-group-numbered")
+	return e
 }
 
-func (b *ListElement) String() string {
-	node := NewNode("ul")
-	node.SetAttr("class", "list-group "+b.cls)
-	for _, v := range b.values {
-		node.AddChild(NewNode("li").SetAttr("class", "list-group-item").SetHtml(fmt.Sprint(v)))
+func (e *listElement) Horizontal() *listElement {
+	e.Attr("class", e.GetAttr("class")+" list-group-horizontal")
+	return e
+}
+
+func (b *listElement) Add(in ...any) *listElement {
+	for _, v := range in {
+		item, _ := ParseHtml(`<li class="list-group-item"></li>`)
+		item.add(v)
+		b.add(item)
 	}
-	return node.String()
+	return b
 }

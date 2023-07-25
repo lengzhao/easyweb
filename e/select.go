@@ -1,76 +1,40 @@
 package e
 
-import (
-	"fmt"
-
-	"github.com/lengzhao/easyweb/util"
-)
-
-type SelectElement struct {
-	BaseElement
-	name string
+type selectElement struct {
+	HtmlToken
 }
 
-func Select(name string) *SelectElement {
-	var out SelectElement
-	if name == "" {
-		name = util.GetCallerID(util.LevelParent)
-	}
-	out.name = name
-	out.id = util.GetID()
+func Select(name string) *selectElement {
+	var out selectElement
+	out.parseText(`<select class="form-select" aria-label="Default select"></select>`)
+	out.Attr("id", getID())
+	out.Attr("name", name)
 	return &out
 }
 
-func (e *SelectElement) String() string {
-	node := NewNode("select")
-	if e.id != "" {
-		node.SetAttr("id", e.id)
+func (e *selectElement) Add(value, text string) *selectElement {
+	item, _ := ParseHtml(`<option value="` + value + `">` + text + `</option>`)
+	if len(e.children) == 0 {
+		item.Attr("selected", "true")
 	}
-	node.SetAttr("name", e.name)
-	node.SetAttr("class", "form-select "+e.cls)
-	node.SetHtml(e.cont)
+	e.add(item)
 
-	return node.String()
-}
-
-func (e *SelectElement) Class(in string) *SelectElement {
-	e.cls += " " + in
 	return e
 }
 
-type SelectItem struct {
-	Value    string
-	Text     string
-	Selected bool
-}
-
-func (e *SelectElement) Add(in any) *SelectElement {
-	switch val := in.(type) {
-	case map[string]string:
-		for k, v := range val {
-			e.cont += NewNode("option").SetAttr("value", v).SetText(k).String()
+func (e *selectElement) Select(value string) *selectElement {
+	// fmt.Println("set select:", value)
+	e.Traverse(func(ht *HtmlToken) error {
+		if ht.info.Data != "option" {
+			return nil
 		}
-	case SelectItem:
-		node := NewNode("option")
-		node.SetText(val.Text)
-		if val.Selected {
-			node.SetAttr("selected", "")
+		if ht.GetAttr("value") == value {
+			// fmt.Println("success to set:", ht.String())
+			ht.Attr("selected", "true")
+		} else {
+			ht.Attr("selected", "")
 		}
-		node.SetAttr("value", val.Value)
-		e.cont += node.String()
-
-	case []SelectItem:
-		for _, v := range val {
-			node := NewNode("option")
-			node.SetText(v.Text)
-			if v.Selected {
-				node.SetAttr("selected", "")
-			}
-			node.SetAttr("value", v.Value)
-			e.cont += node.String()
-		}
-	default:
-		e.cont += fmt.Sprint(in)
-	}
+		return nil
+	})
 	return e
 }

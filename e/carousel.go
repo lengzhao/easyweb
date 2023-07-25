@@ -2,68 +2,70 @@ package e
 
 import (
 	"fmt"
-
-	"github.com/lengzhao/easyweb/util"
 )
 
-type CarouselElement struct {
-	BaseElement
-	slides []string
+type carouselElement struct {
+	HtmlToken
+	id string
 }
 
-func Carousel(id string) *CarouselElement {
-	var out CarouselElement
-	if id == "" {
-		id = util.GetCallerID(util.LevelParent)
-	}
-	out.id = id
+func Carousel() *carouselElement {
+	var out carouselElement
+	out.id = getID()
+	out.parseText(`<div id="` + out.id + `" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-indicators"></div>
+    <div class="carousel-inner">
+	</div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#` + out.id + `" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#` + out.id + `" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>`)
+
 	return &out
 }
 
-func (b *CarouselElement) SetImg(in []string) *CarouselElement {
-	b.slides = in
-	return b
-}
+func (b *carouselElement) Add(image, title, body string) *carouselElement {
+	indicators := b.children[0]
 
-func (b *CarouselElement) Class(in string) *CarouselElement {
-	b.cls += in
-	return b
-}
-
-func (b *CarouselElement) String() string {
-	node := NewNode("div")
-	node.SetAttr("class", "carousel slide "+b.cls)
-	node.SetAttr("id", b.id)
-
-	btns := NewNode("div").SetAttr("class", "carousel-indicators")
-	for i := range b.slides {
-		btn := NewNode("button").SetAttr("type", "button").SetAttr("data-bs-target", "#"+b.id).SetAttr("data-bs-slide-to", fmt.Sprint(i))
-		if i == 0 {
-			btn.SetAttr("class", "active")
-		}
-		btns.AddChild(btn)
+	hd, _ := ParseHtml(`<button type="button" data-bs-target="#" data-bs-slide-to="0" aria-label="Slide 1"></button>`)
+	if len(indicators.children) == 0 {
+		hd.Attr("class", "active")
+		hd.Attr("aria-current", "true")
 	}
-	node.AddChild(btns)
-	imgs := NewNode("div").SetAttr("class", "carousel-inner")
-	for i, s := range b.slides {
-		img := NewNode("div")
-		if i == 0 {
-			img.SetAttr("class", "carousel-item active")
-		} else {
-			img.SetAttr("class", "carousel-item")
-		}
-		img.AddChild(NewNode("img").SetAttr("src", s).SetAttr("class", "d-block w-100"))
-		imgs.AddChild(img)
-	}
-	node.AddChild(imgs)
-	btn1 := NewNode("button").SetAttr("class", "carousel-control-prev").SetAttr("type", "button").SetAttr("data-bs-target", "#"+b.id).SetAttr("data-bs-slide", "prev")
-	btn1.AddChild(NewNode("span").SetAttr("class", "carousel-control-prev-icon").SetAttr("aria-hidden", "true"))
-	btn1.AddChild(NewNode("span").SetAttr("class", "visually-hidden").SetText("Previous"))
-	node.AddChild(btn1)
-	btn2 := NewNode("button").SetAttr("class", "carousel-control-next").SetAttr("type", "button").SetAttr("data-bs-target", "#"+b.id).SetAttr("data-bs-slide", "next")
-	btn2.AddChild(NewNode("span").SetAttr("class", "carousel-control-next-icon").SetAttr("aria-hidden", "true"))
-	btn2.AddChild(NewNode("span").SetAttr("class", "visually-hidden").SetText("Next"))
-	node.AddChild(btn2)
+	hd.Attr("data-bs-target", "#"+b.id)
+	hd.Attr("data-bs-slide-to", fmt.Sprintf("%d", len(indicators.children)))
+	hd.Attr("aria-label", fmt.Sprintf("Slide %d", len(indicators.children)+1))
+	indicators.add(hd)
 
-	return node.String()
+	inner := b.children[1]
+	bd, _ := ParseHtml(`<div class="carousel-item">
+            <img src="` + image + `" class="d-block w-100" alt="..."/>
+            <div class="carousel-caption d-none d-md-block">
+                <h5>` + title + `</h5>
+                <p>` + body + `</p>
+            </div>
+        </div>`)
+	if len(inner.children) == 0 {
+		bd.Attr("class", "carousel-item active")
+	}
+	bd.Traverse(func(ht *HtmlToken) error {
+		if ht.info.Data == "h5" {
+			if title == "" {
+				ht.disable = true
+			}
+		}
+		if ht.info.Data == "p" {
+			if body == "" {
+				ht.disable = true
+			}
+		}
+		return nil
+	})
+	inner.add(bd)
+	return b
 }

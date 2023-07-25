@@ -9,7 +9,7 @@ type cardElement struct {
 }
 
 func (c cardElement) Data() string {
-	return `<div class="card" style="width: 18rem;">
+	return `<div class="card col-3">
 	<img src="..." class="card-img-top" alt="..."/>
 	<div class="card-body">
 	  <h5 class="card-title"></h5>
@@ -22,9 +22,9 @@ func (c cardElement) Data() string {
 
 // 通过调用初始化的时候，添加参数，参数类型为ParamItem，包含key和value
 
-func Card1() *cardElement {
+func Card() *cardElement {
 	out := cardElement{}
-	out.Parse(out.Data())
+	out.parseText(out.Data())
 	out.Traverse(func(ht *HtmlToken) error {
 		switch ht.info.Data {
 		case "img", "a", "p", "h5", "h6":

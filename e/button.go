@@ -6,10 +6,10 @@ type buttonElement struct {
 
 func Button(text string, cb func(id string)) *buttonElement {
 	out := buttonElement{}
-	out.Parse(`<button type="button" class="btn btn-primary">Button</button>`)
+	out.parseText(`<button type="button" class="btn btn-primary">Button</button>`)
 	out.Attr("id", getID())
 	if cb != nil {
-		out.SetCb(func(id string, data []byte) {
+		out.SetCb("", func(id string, data []byte) {
 			cb(id)
 		})
 	}

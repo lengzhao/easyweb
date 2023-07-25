@@ -13,7 +13,7 @@ type radioElement struct {
 
 func Radio(name string) *radioElement {
 	var out radioElement
-	out.Parse("<div></div>")
+	out.parseText("<div></div>")
 	if name == "" {
 		name = util.GetCallerID(util.LevelParent)
 	}
@@ -22,13 +22,34 @@ func Radio(name string) *radioElement {
 	return &out
 }
 
-func (e *radioElement) AddItem(value, text string) *radioElement {
+func (e *radioElement) Add(value, text string) *radioElement {
 	id := getID()
-	e.add(parseStringToToken(`<div class="form-check">
+	item, _ := ParseHtml(`<div class="form-check">
 	<input class="form-check-input" type="radio" name="` + e.name + `" id="` + id + `" value="` + value + `"/>
 	<label class="form-check-label" for="` + id + `">` + text + `</label>
-  </div>`))
+  </div>`)
+	if len(e.children) == 0 {
+		item.children[0].Attr("checked", "true")
+	}
+	e.add(item)
 
+	return e
+}
+
+func (e *radioElement) Check(value string) *radioElement {
+	// fmt.Println("set check:", value)
+	e.Traverse(func(ht *HtmlToken) error {
+		if ht.info.Data != "input" {
+			return nil
+		}
+		if ht.GetAttr("value") == value {
+			// fmt.Println("success to set:", ht.String())
+			ht.Attr("checked", "true")
+		} else {
+			ht.Attr("checked", "")
+		}
+		return nil
+	})
 	return e
 }
 
@@ -45,28 +66,5 @@ func (e *radioElement) Inline() *radioElement {
 		ht.Attr("class", "form-check form-check-inline")
 		return nil
 	})
-	return e
-}
-
-type RadioItem struct {
-	Value string
-	Text  string
-}
-
-func (e *radioElement) Add(in any) *radioElement {
-	switch val := in.(type) {
-	case map[string]string:
-		for name, text := range val {
-			e.AddItem(name, text)
-		}
-	case []RadioItem:
-		for _, v := range val {
-			e.AddItem(v.Value, v.Text)
-		}
-	case RadioItem:
-		e.AddItem(val.Value, val.Text)
-	default:
-		e.add(Box(in))
-	}
 	return e
 }

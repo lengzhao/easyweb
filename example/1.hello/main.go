@@ -15,7 +15,7 @@ func main() {
 		page.Title("MyWeb")
 		page.Write("<h1>Hello World</h1>")
 		page.AddCss("/static/css/format2.css")
-		page.Write(e.Entry("333").Prefix("@BBB").Suffix("$$$$"))
+		page.Write(e.InputGroup("333", "@BBB").Suffix("$$$$"))
 		var count int
 		page.Write(e.Button("Click", func(id string) {
 			fmt.Println("button click001:", id)

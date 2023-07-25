@@ -1,23 +1,22 @@
 package e
 
-type LinkElement struct {
-	// BaseElement
-	node *HtmlNode
+type linkElement struct {
+	HtmlToken
 }
 
-func Link(text, url string) *LinkElement {
-	var out LinkElement
-	out.node = NewNode("a")
-	out.node.SetText(text)
-	out.node.SetAttr("href", url)
+func Link(text, url string) *linkElement {
+	var out linkElement
+	out.parseText(`<a href="` + url + `">` + text + `</a>`)
 	return &out
 }
 
-func (b *LinkElement) Blank() *LinkElement {
-	b.node.SetAttr("target", "_blank")
+func (b *linkElement) Blank() *linkElement {
+	b.Attr("target", "_blank")
 	return b
 }
 
-func (b *LinkElement) String() string {
-	return b.node.String()
+func (b *linkElement) AsButton() *linkElement {
+	b.Attr("class", "btn btn-primary")
+	b.Attr("role", "button")
+	return b
 }

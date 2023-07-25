@@ -25,7 +25,7 @@ type tabsElement struct {
 
 func Tabs() *tabsElement {
 	var out tabsElement
-	out.Parse(`<div><nav>
+	out.parseText(`<div><nav>
 			<div class="nav nav-tabs" role="tablist">
 			</div></nav>
 		<div class="tab-content">
@@ -38,8 +38,8 @@ func Tabs() *tabsElement {
 func (b *tabsElement) Add(title string, body any) *tabsElement {
 	hid := getID()
 	id := getID()
-	hd := parseStringToToken(`<button class="nav-link" id="` + hid + `" data-bs-toggle="tab" data-bs-target="#` + id + `" type="button" role="tab" aria-controls="` + id + `" aria-selected="true">` + title + `</button>`)
-	bd := parseStringToToken(`<div class="tab-pane fade" id="` + id + `" role="tabpanel" aria-labelledby="` + hid + `"></div>`)
+	hd, _ := ParseHtml(`<button class="nav-link" id="` + hid + `" data-bs-toggle="tab" data-bs-target="#` + id + `" type="button" role="tab" aria-controls="` + id + `" aria-selected="true">` + title + `</button>`)
+	bd, _ := ParseHtml(`<div class="tab-pane fade" id="` + id + `" role="tabpanel" aria-labelledby="` + hid + `"></div>`)
 	bd.add(body)
 	b.Traverse(func(ht *HtmlToken) error {
 		if ht.GetAttr("role") == "tablist" {
