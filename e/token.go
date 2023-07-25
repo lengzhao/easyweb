@@ -57,10 +57,14 @@ func (n *HtmlToken) parse(tkn *html.Tokenizer) error {
 			child := &HtmlToken{}
 			child.info = tkn.Token()
 			n.children = append(n.children, child)
-			if child.info.Data == "input" {
+			switch child.info.Data {
+			case "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr":
+				child.info.Type = html.SelfClosingTagToken
 				continue
+			default:
+				child.parse(tkn)
 			}
-			child.parse(tkn)
+
 		case html.SelfClosingTagToken:
 			child := &HtmlToken{}
 			child.info = tkn.Token()

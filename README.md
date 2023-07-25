@@ -34,4 +34,6 @@ func main() {
 }
 ```
 
+The browser opens <http://localhost:8080>
+
 For more examples, please see the example folder
