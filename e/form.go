@@ -59,12 +59,6 @@ func (b *formElement) SetFileCb(cb func(id string, data []byte)) *formElement {
 	return b
 }
 
-type FormItem struct {
-	Name  string
-	Value string
-	Text  string
-}
-
 func (b *formElement) AddInput(name, text string) *formElement {
 	item := InputGroup(name, text)
 	b.Traverse(func(ht *HtmlToken) error {

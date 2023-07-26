@@ -57,13 +57,10 @@ func (n *HtmlToken) parse(tkn *html.Tokenizer) error {
 			child := &HtmlToken{}
 			child.info = tkn.Token()
 			n.children = append(n.children, child)
-			switch child.info.Data {
-			case "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr":
-				child.info.Type = html.SelfClosingTagToken
+			if selfClosingTagToken[child.info.Data] {
 				continue
-			default:
-				child.parse(tkn)
 			}
+			child.parse(tkn)
 
 		case html.SelfClosingTagToken:
 			child := &HtmlToken{}
@@ -72,6 +69,9 @@ func (n *HtmlToken) parse(tkn *html.Tokenizer) error {
 		case html.EndTagToken:
 			lt := tkn.Token()
 			if n.info.Data != lt.Data {
+				if selfClosingTagToken[lt.Data] {
+					return nil
+				}
 				fmt.Println("warning end:", n.info, lt.Data)
 				return fmt.Errorf("end tag mismatch,hope:%s,get:%s", n.info.Data, lt.Data)
 			}
@@ -79,7 +79,7 @@ func (n *HtmlToken) parse(tkn *html.Tokenizer) error {
 		case html.TextToken:
 			n.text += strings.TrimSpace(string(tkn.Text()))
 		default:
-			fmt.Println("tt:", tt, tkn.Token(), tkn.Text())
+			// fmt.Println("tt:", tt, tkn.Token(), tkn.Text())
 		}
 	}
 }
@@ -269,6 +269,24 @@ var booleanAttributes map[string]bool = map[string]bool{
 	"required":        true,
 	"reversed":        true,
 	"selected":        true,
+}
+
+var selfClosingTagToken map[string]bool = map[string]bool{
+	"area":   true,
+	"base":   true,
+	"br":     true,
+	"col":    true,
+	"embed":  true,
+	"hr":     true,
+	"img":    true,
+	"input":  true,
+	"keygen": true,
+	"link":   true,
+	"meta":   true,
+	"param":  true,
+	"source": true,
+	"track":  true,
+	"wbr":    true,
 }
 
 var lastId int64

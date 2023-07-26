@@ -35,22 +35,3 @@ func (e *accordionElement) AddItem(header, text string) *accordionElement {
 
 	return e
 }
-
-type AccordionItem struct {
-	Header string
-	Text   string
-}
-
-func (e *accordionElement) Add(in any) *accordionElement {
-	switch val := in.(type) {
-	case AccordionItem:
-		e.AddItem(val.Header, val.Text)
-	case []AccordionItem:
-		for _, v := range val {
-			e.AddItem(v.Header, v.Text)
-		}
-	default:
-		e.add(in)
-	}
-	return e
-}
