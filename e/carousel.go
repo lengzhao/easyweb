@@ -32,7 +32,7 @@ func Carousel() *carouselElement {
 func (b *carouselElement) Add(image, title, body string) *carouselElement {
 	indicators := b.children[0]
 
-	hd, _ := ParseHtml(`<button type="button" data-bs-target="#" data-bs-slide-to="0" aria-label="Slide 1"></button>`)
+	hd, _ := ParseHtml(`<button type="button" data-bs-target="#" data-bs-slide-to="0" aria-label="Slide ` + fmt.Sprintf("%d", len(indicators.children)+1) + `"></button>`)
 	if len(indicators.children) == 0 {
 		hd.Attr("class", "active")
 		hd.Attr("aria-current", "true")

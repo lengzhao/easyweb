@@ -73,7 +73,7 @@ func (b *navbarElement) Add(text, url string) *navbarElement {
 	return b
 }
 
-func (b *navbarElement) AddSearchItem(name string, cb func(value string)) *navbarElement {
+func (b *navbarElement) SetSearchCb(cb func(value string)) *navbarElement {
 	id := getID()
 	b.Traverse(func(ht *HtmlToken) error {
 		if ht.info.Data != "form" {
@@ -83,12 +83,12 @@ func (b *navbarElement) AddSearchItem(name string, cb func(value string)) *navba
 			return nil
 		}
 		ht.Attr("id", id)
-		ht.children[0].Attr("name", name)
+		ht.children[0].Attr("name", id)
 		ht.disable = false
 		ht.SetCb("form", func(id string, data []byte) {
 			info := make(map[string]string)
 			json.Unmarshal(data[1:], &info)
-			cb(info[name])
+			cb(info[id])
 		})
 		return fmt.Errorf("finish")
 	})

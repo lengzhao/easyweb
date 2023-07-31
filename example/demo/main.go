@@ -17,7 +17,7 @@ func main() {
 		navbar.Add("Demo", "#")
 		navbar.Add("Link", "#")
 		navbar.Add("Action", "#")
-		navbar.AddSearchItem("search", func(value string) {
+		navbar.SetSearchCb(func(value string) {
 			fmt.Println("search:", value)
 		})
 		page.Write(navbar)
@@ -49,7 +49,15 @@ func main() {
 			page.Write("button click:" + fmt.Sprint(count))
 			page.Write(time.Now().String())
 		}))
-		row.Add(e.Link("#", "Link ..."))
+		row.Add(e.Link("Link ...", "#"))
+		dropdown := e.Dropdown("Dropdown001").AddLink("Link2 ...", "#")
+		dropdown.AddButton("button3", func(id string) {
+			page.Write("button3 click:" + id + time.Now().String())
+		})
+		dropdown.AddButton("button4", func(id string) {
+			page.Write("button4 click:" + id + time.Now().String())
+		})
+		row.Add(dropdown)
 		tabs.Add("Button", row)
 
 		box2 := e.Row()
@@ -72,6 +80,16 @@ func main() {
 		table.AddItem([]any{"4", "Mark", "Otto", "@mdo"})
 		table.BoldFirstRow()
 		tabs.Add("Table", table)
+
+		entry := e.InputGroup("name", "Name")
+		radio := e.Radio("radio1").Add("name1", "text1").Add("name2", "text2").Add("name3", "text3").Inline().Check("name2")
+		selectItem := e.Select("select1").Add("s1", "s1").Add("s2", "s2").Add("s3", "s3").Select("s2")
+		form := e.Form(func(id string, info map[string]string) {
+			fmt.Println("form data:", info)
+			page.Write("form data:")
+			page.Write(info)
+		}).Add(entry).Add(radio).Add(selectItem)
+		tabs.Add("Form", form)
 
 		page.Write(tabs)
 

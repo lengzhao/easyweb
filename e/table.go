@@ -4,6 +4,7 @@ import "fmt"
 
 type tableElement struct {
 	HtmlToken
+	boldFirst bool
 }
 
 func Table(head ...string) *tableElement {
@@ -31,8 +32,11 @@ func Table(head ...string) *tableElement {
 
 func (e *tableElement) AddItem(in []any) *tableElement {
 	tr, _ := ParseHtml(`<tr></tr>`)
-	for _, v := range in {
+	for i, v := range in {
 		td, _ := ParseHtml(`<td></td>`)
+		if e.boldFirst && i == 0 {
+			td, _ = ParseHtml(`<th scope="row"></th>`)
+		}
 		td.add(v)
 		tr.add(td)
 	}
@@ -49,6 +53,7 @@ func (e *tableElement) AddValue(in [][]any) *tableElement {
 }
 
 func (e *tableElement) BoldFirstRow() *tableElement {
+	e.boldFirst = true
 
 	e.Traverse(func(ht *HtmlToken) error {
 		if ht.info.Data != "tbody" {

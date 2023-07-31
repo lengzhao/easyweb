@@ -14,15 +14,13 @@ type formElement struct {
 	fileCb func(id string, data []byte)
 }
 
-var fromTempData string = `<form>
-<div>
-</div>
-<button type="submit" class="btn btn-primary">Submit</button>
-</form>`
-
 func Form(cb func(id string, info map[string]string)) *formElement {
 	var out formElement
-	out.parseText(fromTempData)
+	out.parseText(`<form>
+	<div>
+	</div>
+	<button type="submit" class="btn btn-primary">Submit</button>
+	</form>`)
 	out.Attr("id", getID())
 	out.cb = cb
 	if cb != nil {

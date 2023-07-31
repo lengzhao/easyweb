@@ -6,6 +6,11 @@ import (
 )
 
 var lastId int64
+var idPrefix string = "id"
+
+func SetIDPrefix(prefix string) {
+	idPrefix = prefix
+}
 
 // GetID returns a unique identifier.
 //
@@ -19,5 +24,5 @@ var lastId int64
 //	string: The unique identifier.
 func GetID() string {
 	val := atomic.AddInt64(&lastId, 1)
-	return fmt.Sprintf("id%04d", val)
+	return fmt.Sprintf("%s_%04d", idPrefix, val)
 }
