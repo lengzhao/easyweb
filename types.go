@@ -8,6 +8,7 @@ type Page interface {
 	Title(string) Page
 	AddJs(string) Page
 	AddCss(string) Page
+	RunJs(js string) Page
 	Write(any) string
 	WriteWithID(string, any) string
 	Refresh(e IGetID)
@@ -66,5 +67,5 @@ const (
 )
 
 type IEnableRegist interface {
-	RegistEvent(p Page)
+	WillRegistEvent(p Page)
 }

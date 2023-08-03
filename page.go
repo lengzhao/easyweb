@@ -25,6 +25,13 @@ func (p *easyPage) AddJs(js string) Page {
 	return p
 }
 
+func (p *easyPage) RunJs(js string) Page {
+	id := util.GetCallerID(util.LevelParent)
+	msg := toClientMsgData{id, "eval", js}
+	p.sendMsg(msg)
+	return p
+}
+
 func (p *easyPage) GetPeer() string {
 	return p.conn.RemoteAddr().String()
 }
@@ -45,7 +52,7 @@ func (p *easyPage) WriteWithID(id string, e any) string {
 	msg := toClientMsgData{id, "", fmt.Sprint(e)}
 	p.sendMsg(msg)
 	if e, ok := e.(IEnableRegist); ok {
-		e.RegistEvent(p)
+		e.WillRegistEvent(p)
 	}
 	return id
 }
@@ -119,14 +126,28 @@ func (p *easyPage) processMsg() {
 				if cb.Event != nil {
 					out := []byte{byte(CbDataTypeString)}
 					out = append(out, []byte(msg.Msg)...)
-					cb.Event.MessageCallbackFromFramwork(msg.ID, out)
+					go func(id string, data []byte) {
+						defer func() {
+							if r := recover(); r != nil {
+								fmt.Println("Recovered", r)
+							}
+						}()
+						cb.Event.MessageCallbackFromFramwork(msg.ID, out)
+					}(msg.ID, out)
 				}
 			case fileMsgData:
 				cb := p.callback[msg.ID]
 				if cb.Event != nil {
 					out := []byte{byte(CbDataTypeBinary)}
 					out = append(out, msg.BinaryData...)
-					cb.Event.MessageCallbackFromFramwork(msg.ID, out)
+					go func(id string, data []byte) {
+						defer func() {
+							if r := recover(); r != nil {
+								fmt.Println("Recovered", r)
+							}
+						}()
+						cb.Event.MessageCallbackFromFramwork(msg.ID, out)
+					}(msg.ID, out)
 				}
 			case eventMsgData:
 				p.callback[msg.ID] = msg

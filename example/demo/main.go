@@ -91,6 +91,22 @@ func main() {
 		}).Add(entry).Add(radio).Add(selectItem)
 		tabs.Add("Form", form)
 
+		box3 := e.Box()
+		box3.Add(e.Button("Click", func(id string) {
+			page.Write("button click:" + id + time.Now().String())
+		}))
+		label := e.Label("Click Label")
+		label.SetCb("click", func(id string, data []byte) {
+			page.Write("label click:" + id + time.Now().String())
+		})
+		box3.Add(label)
+		box3.Add(e.Button("RunJs From Server", func(id string) {
+			page.RunJs(`console.log("hello world. 123456")`)
+			page.Write(`run js:console.log("hello world. 123456")` + time.Now().String())
+
+		}))
+		tabs.Add("Event", box3)
+
 		page.Write(tabs)
 
 	}, easyweb.DefaultPagePath...)

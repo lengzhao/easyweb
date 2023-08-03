@@ -56,6 +56,9 @@
                 case "event":
                     bindEvent(obj.msg, obj.id);
                     break
+                case "eval":
+                    eval(obj.msg);
+                    break
                 default:
                     var element = $("#" + obj.id);
                     if (element.length > 0) {
@@ -101,7 +104,7 @@
                                 f = value[x];
                                 files.push(f);
                                 info = {}
-                                value[x] = f.name+":"+f.size;
+                                value[x] = f.name + ":" + f.size;
                             }
                         }
                         console.log("form:", value)
@@ -117,7 +120,8 @@
                     });
                     break
                 default:
-                    $(id).on(typ, function () {
+                    $("#" + id).on(typ, function () {
+                        console.log("event:", typ, id)
                         var info = { type: typ, msg: $(this).text(), id: id }
                         ws.send(JSON.stringify(info));
                     });

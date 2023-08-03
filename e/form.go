@@ -24,22 +24,27 @@ func Form(cb func(id string, info map[string]string)) *formElement {
 	out.Attr("id", getID())
 	out.cb = cb
 	if cb != nil {
-		out.SetCb("", func(id string, data []byte) {
-			if data[0] != byte(easyweb.CbDataTypeString) {
-				if out.fileCb != nil {
-					out.fileCb(id, data)
-				}
-				return
-			}
-			info := make(map[string]string)
-			err := json.Unmarshal(data[1:], &info)
-			if err != nil {
-				return
-			}
-			cb(id, info)
-		})
+		out.SetCb("", out.eventCb)
 	}
 	return &out
+}
+
+func (b *formElement) eventCb(id string, data []byte) {
+	if data[0] != byte(easyweb.CbDataTypeString) {
+		if b.fileCb != nil {
+			b.fileCb(id, data[1:])
+		}
+		return
+	}
+	if b.cb == nil {
+		return
+	}
+	info := make(map[string]string)
+	err := json.Unmarshal(data[1:], &info)
+	if err != nil {
+		return
+	}
+	b.cb(id, info)
 }
 
 func (b *formElement) Action(action, enctype string) *formElement {
@@ -54,6 +59,9 @@ func (b *formElement) Action(action, enctype string) *formElement {
 
 func (b *formElement) SetFileCb(cb func(id string, data []byte)) *formElement {
 	b.fileCb = cb
+	if cb != nil {
+		b.SetCb("", b.eventCb)
+	}
 	return b
 }
 
@@ -64,7 +72,7 @@ func (b *formElement) AddInput(name, text string) *formElement {
 			return nil
 		}
 		ht.add(item)
-		return nil
+		return fmt.Errorf("finish")
 	})
 	return b
 }

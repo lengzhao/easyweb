@@ -186,13 +186,13 @@ func (n *HtmlToken) Self() *HtmlToken {
 	return n
 }
 
-func (n *HtmlToken) RegistEvent(p easyweb.Page) {
+func (n *HtmlToken) WillRegistEvent(p easyweb.Page) {
 	// fmt.Println("try regist event:", n.GetAttr("id"), n.info.Data, n.cb)
 	if n.cb != nil && n.GetAttr("id") != "" {
 		p.RegistEvent(n.GetAttr("id"), n.eventType, n)
 	}
 	for _, child := range n.children {
-		child.RegistEvent(p)
+		child.WillRegistEvent(p)
 	}
 }
 
@@ -204,8 +204,6 @@ func getEventType2(in string) string {
 		return "input"
 	case "textarea":
 		return "input"
-	// case "radio":
-	// 	return "change"
 	case "button":
 		return "button"
 	default:
@@ -231,17 +229,27 @@ func (n *HtmlToken) MessageCallbackFromFramwork(id string, data []byte) bool {
 type ITraverseCb func(*HtmlToken) error
 
 func (n *HtmlToken) Traverse(cb ITraverseCb) error {
+	num := len(n.children)
 	err := cb(n)
 	if err != nil {
 		return err
 	}
-	for _, child := range n.children {
+	for i, child := range n.children {
+		if i >= num {
+			// new children
+			break
+		}
 		err = child.Traverse(cb)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (n *HtmlToken) AddChild(child *HtmlToken) *HtmlToken {
+	n.children = append(n.children, child)
+	return n
 }
 
 var booleanAttributes map[string]bool = map[string]bool{

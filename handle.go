@@ -6,10 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io"
 	"log"
 	"net/http"
-	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -62,7 +60,6 @@ func RegisterPage(pn PageFunc, path ...string) string {
 	}
 	wssPath := "/wss/" + pid
 	http.HandleFunc(wssPath, page.HandleWs)
-	http.HandleFunc("/wss/"+pid+"/upload/", page.HandleUpload)
 	return wssPath
 }
 
@@ -174,43 +171,4 @@ func (p *pageWs) HandleHtml(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Fprint(w, p.pageData)
-}
-
-func (p *pageWs) HandleUpload(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		return
-	}
-	fn := path.Clean(r.URL.Path)
-	r.ParseMultipartForm(32 << 20)
-
-	msgInfo := make(map[string]string)
-	for k, v := range r.Form {
-		msgInfo[k] = strings.Join(v, ",")
-	}
-
-	for k := range r.MultipartForm.File {
-		_, fileHeader, err := r.FormFile(k)
-		if err != nil {
-			fmt.Println(k, err)
-			continue
-		}
-		msgInfo[k] = fileHeader.Filename
-	}
-	fData, _ := json.MarshalIndent(msgInfo, "", "  ")
-	fmt.Println("form data:", fn, string(fData))
-
-	file, handler, err := r.FormFile("file1")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer file.Close()
-	fmt.Fprintf(w, "%v", handler.Header)
-	f, err := os.OpenFile("./test/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer f.Close()
-	io.Copy(f, file)
 }
