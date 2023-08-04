@@ -36,7 +36,7 @@ func main() {
 		box.Add(e.InputGroup("name2", "Hello").Suffix("$$$$").Value("100000"))
 		box.Add(e.InputGroup("name2", "Number").ChangeType("number"))
 		box.Add(e.InputGroup("name2", "File").ChangeType("file"))
-		box.Add(e.Radio("radio1").Add("name1", "text1").Add("name2", "text2").Add("name3", "text3").Inline().Check("name2"))
+		box.Add(e.Radio("radio1").Add("name1", "text1").Add("name2", "text2").Add("name3", "text3").Inline().Select("name2"))
 		list := e.List(e.Check("check1", "check text1").SetChecked(), e.Check("check2", "check text2"), e.Check("check3", "check text3")).Horizontal().ShowIndex()
 		box.Add(list)
 		box.Add(e.RangeInput("range", "range").SetRange(1, 30, 1).SetValue(15))
@@ -74,15 +74,12 @@ func main() {
 		tabs.Add("Carousel", carousel)
 
 		table := e.Table("#", "First", "Last", "Handle")
-		table.AddItem([]any{"1", "Mark", "Otto", "@mdo"})
-		table.AddItem([]any{"2", "Jacob", "Thornton", "@fat"})
-		table.AddItem([]any{"3", "Larry the Bird", "...", "@twitter"})
-		table.AddItem([]any{"4", "Mark", "Otto", "@mdo"})
+		table.AddValue([][]any{{"1", "Mark", "Otto", "@mdo"}, {"2", "Jacob", "Thornton", "@fat"}, {"3", "Larry the Bird", "...", "@twitter"}, {"4", "Mark", "Otto", "@mdo"}})
 		table.BoldFirstRow()
 		tabs.Add("Table", table)
 
 		entry := e.InputGroup("name", "Name")
-		radio := e.Radio("radio1").Add("name1", "text1").Add("name2", "text2").Add("name3", "text3").Inline().Check("name2")
+		radio := e.Radio("radio1").Add("name1", "text1").Add("name2", "text2").Add("name3", "text3").Inline().Select("name2")
 		selectItem := e.Select("select1").Add("s1", "s1").Add("s2", "s2").Add("s3", "s3").Select("s2")
 		form := e.Form(func(id string, info map[string]string) {
 			fmt.Println("form data:", info)
@@ -103,6 +100,11 @@ func main() {
 		box3.Add(e.Button("RunJs From Server", func(id string) {
 			page.RunJs(`console.log("hello world. 123456")`)
 			page.Write(`run js:console.log("hello world. 123456")` + time.Now().String())
+
+		}))
+		box3.Add(e.Button("Off Event(unbind)", func(id string) {
+			page.Write(`event off:` + time.Now().String())
+			page.RegistEvent(id, "click", nil)
 
 		}))
 		tabs.Add("Event", box3)

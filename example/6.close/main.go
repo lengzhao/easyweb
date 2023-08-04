@@ -19,7 +19,7 @@ func main() {
 			fmt.Println("form data:", info)
 		}).Add(radio).Add(selectItem))
 		for i := 0; i < 5; i++ {
-			page.Write(fmt.Sprintf("the websocket will be close in %d seconds", 5-i))
+			page.Write(fmt.Sprintf("the websocket will be closed in %d seconds", 5-i))
 			time.Sleep(1 * time.Second)
 		}
 		page.Write("the websocket is closed")

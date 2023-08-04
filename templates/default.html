@@ -56,6 +56,9 @@
                 case "event":
                     bindEvent(obj.msg, obj.id);
                     break
+                case "off":
+                    $("#" + obj.id).off(obj.msg)
+                    break
                 case "eval":
                     eval(obj.msg);
                     break
@@ -87,12 +90,14 @@
                     });
                     break;
                 case "button":
+                case "click":
                     $("#" + id).click(function () {
                         var info = { type: "button", msg: "click", id: id }
                         console.log("click:", info)
                         ws.send(JSON.stringify(info));
                     });
                     break
+                case "submit":
                 case "form":
                     $("#" + id).submit(function (event) {
                         event.preventDefault();

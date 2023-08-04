@@ -15,6 +15,7 @@ type Page interface {
 	GetPeer() string
 	Close()
 	WaitUntilClosed()
+	// regist element event after loaded
 	RegistEvent(id, typ string, cb IMessageCb)
 }
 
@@ -66,6 +67,6 @@ const (
 	CbDataTypeBinary
 )
 
-type IEnableRegist interface {
-	WillRegistEvent(p Page)
+type IAfterLoaded interface {
+	AfterElementLoadedFromFramwork(p Page)
 }

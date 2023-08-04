@@ -14,8 +14,9 @@ import (
 type ICallback func(id string, data []byte)
 
 type HtmlToken struct {
-	info      html.Token
+	Info      html.Token
 	children  []*HtmlToken
+	parent    string
 	text      string
 	eventType string
 	cb        ICallback
@@ -40,7 +41,7 @@ func (n *HtmlToken) parseText(text string) error {
 	if len(n.children) == 0 {
 		log.Println("fail to parse:", err)
 		n.children = nil
-	} else if n.info.Data == "" && n.text == "" {
+	} else if n.Info.Data == "" && n.text == "" {
 		*n = *n.children[0]
 	}
 	return nil
@@ -55,25 +56,25 @@ func (n *HtmlToken) parse(tkn *html.Tokenizer) error {
 		switch tt {
 		case html.StartTagToken:
 			child := &HtmlToken{}
-			child.info = tkn.Token()
+			child.Info = tkn.Token()
 			n.children = append(n.children, child)
-			if selfClosingTagToken[child.info.Data] {
+			if selfClosingTagToken[child.Info.Data] {
 				continue
 			}
 			child.parse(tkn)
 
 		case html.SelfClosingTagToken:
 			child := &HtmlToken{}
-			child.info = tkn.Token()
+			child.Info = tkn.Token()
 			n.children = append(n.children, child)
 		case html.EndTagToken:
 			lt := tkn.Token()
-			if n.info.Data != lt.Data {
+			if n.Info.Data != lt.Data {
 				if selfClosingTagToken[lt.Data] {
 					return nil
 				}
-				fmt.Println("warning end:", n.info, lt.Data)
-				return fmt.Errorf("end tag mismatch,hope:%s,get:%s", n.info.Data, lt.Data)
+				fmt.Println("warning end:", n.Info, lt.Data)
+				return fmt.Errorf("end tag mismatch,hope:%s,get:%s", n.Info.Data, lt.Data)
 			}
 			return nil
 		case html.TextToken:
@@ -87,11 +88,11 @@ func (n *HtmlToken) String() string {
 	if n.disable {
 		return ""
 	}
-	if n.info.Data == "" {
+	if n.Info.Data == "" {
 		return n.text
 	}
-	out := "<" + n.info.Data
-	for _, it := range n.info.Attr {
+	out := "<" + n.Info.Data
+	for _, it := range n.Info.Attr {
 		if booleanAttributes[it.Key] {
 			out += " " + it.Key
 		} else if it.Val != "" {
@@ -99,7 +100,7 @@ func (n *HtmlToken) String() string {
 			out += `="` + it.Val + `"`
 		}
 	}
-	if n.info.Type == html.SelfClosingTagToken {
+	if n.Info.Type == html.SelfClosingTagToken {
 		return out + "/>"
 	}
 	out += ">"
@@ -107,7 +108,7 @@ func (n *HtmlToken) String() string {
 		out += child.String()
 	}
 	out += n.text
-	out += "</" + n.info.Data + ">"
+	out += "</" + n.Info.Data + ">"
 	return out
 }
 
@@ -117,7 +118,7 @@ func (n *HtmlToken) GetID() string {
 
 // get Attribute
 func (n *HtmlToken) GetAttr(k string) string {
-	for _, it := range n.info.Attr {
+	for _, it := range n.Info.Attr {
 		if it.Key == k {
 			if it.Val == "" && booleanAttributes[k] {
 				return "true"
@@ -134,12 +135,12 @@ func (n *HtmlToken) Attr(k, v string) *HtmlToken {
 	if v != "" {
 		attr = append(attr, html.Attribute{Key: k, Val: v})
 	}
-	for _, it := range n.info.Attr {
+	for _, it := range n.Info.Attr {
 		if it.Key != k {
 			attr = append(attr, it)
 		}
 	}
-	n.info.Attr = attr
+	n.Info.Attr = attr
 	return n
 }
 
@@ -170,14 +171,14 @@ var _ iSelf = &HtmlToken{}
 
 func (n *HtmlToken) SetCb(typ string, cb ICallback) *HtmlToken {
 	if typ == "" {
-		typ = getEventType2(n.info.Data)
+		typ = getEventType2(n.Info.Data)
 	}
 	n.eventType = typ
 	n.cb = cb
 	if n.GetAttr("id") == "" {
 		n.Attr("id", util.GetID())
 	}
-	// fmt.Println("set event callback:", n.GetAttr("id"), n.info.Data, n.cb)
+	// fmt.Println("set event callback:", n.GetAttr("id"), n.Info.Data, n.cb)
 	return n
 }
 
@@ -186,13 +187,13 @@ func (n *HtmlToken) Self() *HtmlToken {
 	return n
 }
 
-func (n *HtmlToken) WillRegistEvent(p easyweb.Page) {
-	// fmt.Println("try regist event:", n.GetAttr("id"), n.info.Data, n.cb)
+func (n *HtmlToken) AfterElementLoadedFromFramwork(p easyweb.Page) {
+	// fmt.Println("try regist event:", n.GetAttr("id"), n.Info.Data, n.cb)
 	if n.cb != nil && n.GetAttr("id") != "" {
 		p.RegistEvent(n.GetAttr("id"), n.eventType, n)
 	}
 	for _, child := range n.children {
-		child.WillRegistEvent(p)
+		child.AfterElementLoadedFromFramwork(p)
 	}
 }
 
@@ -226,15 +227,16 @@ func (n *HtmlToken) MessageCallbackFromFramwork(id string, data []byte) bool {
 	return false
 }
 
-type ITraverseCb func(*HtmlToken) error
+type ITraverseCb func(parent string, token *HtmlToken) error
 
 func (n *HtmlToken) Traverse(cb ITraverseCb) error {
 	num := len(n.children)
-	err := cb(n)
+	err := cb(n.parent, n)
 	if err != nil {
 		return err
 	}
 	for i, child := range n.children {
+		child.parent = n.Info.Data
 		if i >= num {
 			// new children
 			break
@@ -250,6 +252,14 @@ func (n *HtmlToken) Traverse(cb ITraverseCb) error {
 func (n *HtmlToken) AddChild(child *HtmlToken) *HtmlToken {
 	n.children = append(n.children, child)
 	return n
+}
+
+func (n *HtmlToken) GetChilds() []*HtmlToken {
+	return n.children
+}
+
+func (n *HtmlToken) GetText() string {
+	return n.text
 }
 
 var booleanAttributes map[string]bool = map[string]bool{

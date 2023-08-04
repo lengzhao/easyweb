@@ -25,8 +25,8 @@ func (c cardElement) Data() string {
 func Card() *cardElement {
 	out := cardElement{}
 	out.parseText(out.Data())
-	out.Traverse(func(ht *HtmlToken) error {
-		switch ht.info.Data {
+	out.Traverse(func(parent string, ht *HtmlToken) error {
+		switch ht.Info.Data {
 		case "img", "a", "p", "h5", "h6":
 			ht.disable = true
 		}
@@ -41,8 +41,8 @@ func (b *cardElement) Image(src, alt string) *cardElement {
 	if src == "" {
 		return b
 	}
-	b.Traverse(func(ht *HtmlToken) error {
-		if ht.info.Data == "img" {
+	b.Traverse(func(parent string, ht *HtmlToken) error {
+		if ht.Info.Data == "img" {
 			ht.Attr("src", src)
 			ht.Attr("alt", alt)
 			ht.disable = false
@@ -54,13 +54,13 @@ func (b *cardElement) Image(src, alt string) *cardElement {
 }
 
 func (b *cardElement) Title(title, subTitle string) *cardElement {
-	b.Traverse(func(ht *HtmlToken) error {
-		if ht.info.Data == "h5" {
+	b.Traverse(func(parent string, ht *HtmlToken) error {
+		if ht.Info.Data == "h5" {
 			ht.text = title
 			ht.children = nil
 			ht.disable = false
 		}
-		if ht.info.Data == "h6" {
+		if ht.Info.Data == "h6" {
 			ht.text = subTitle
 			ht.children = nil
 			ht.disable = false
@@ -72,8 +72,8 @@ func (b *cardElement) Title(title, subTitle string) *cardElement {
 }
 
 func (b *cardElement) Link(url, text string) *cardElement {
-	b.Traverse(func(ht *HtmlToken) error {
-		if ht.info.Data == "a" {
+	b.Traverse(func(parent string, ht *HtmlToken) error {
+		if ht.Info.Data == "a" {
 			ht.Attr("href", url)
 			ht.text = text
 			ht.children = nil
@@ -86,8 +86,8 @@ func (b *cardElement) Link(url, text string) *cardElement {
 }
 
 func (b *cardElement) Text(in any) *cardElement {
-	b.Traverse(func(ht *HtmlToken) error {
-		if ht.info.Data == "p" {
+	b.Traverse(func(parent string, ht *HtmlToken) error {
+		if ht.Info.Data == "p" {
 			ht.text = fmt.Sprint(in)
 			ht.children = nil
 			ht.disable = false

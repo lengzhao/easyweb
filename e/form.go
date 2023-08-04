@@ -24,7 +24,7 @@ func Form(cb func(id string, info map[string]string)) *formElement {
 	out.Attr("id", getID())
 	out.cb = cb
 	if cb != nil {
-		out.SetCb("", out.eventCb)
+		out.SetCb("submit", out.eventCb)
 	}
 	return &out
 }
@@ -60,15 +60,15 @@ func (b *formElement) Action(action, enctype string) *formElement {
 func (b *formElement) SetFileCb(cb func(id string, data []byte)) *formElement {
 	b.fileCb = cb
 	if cb != nil {
-		b.SetCb("", b.eventCb)
+		b.SetCb("submit", b.eventCb)
 	}
 	return b
 }
 
 func (b *formElement) AddInput(name, text string) *formElement {
 	item := InputGroup(name, text)
-	b.Traverse(func(ht *HtmlToken) error {
-		if ht.info.Data != "div" {
+	b.Traverse(func(parent string, ht *HtmlToken) error {
+		if ht.Info.Data != "div" || parent != "form" {
 			return nil
 		}
 		ht.add(item)
@@ -78,8 +78,8 @@ func (b *formElement) AddInput(name, text string) *formElement {
 }
 
 func (b *formElement) Add(in any) *formElement {
-	b.Traverse(func(ht *HtmlToken) error {
-		if ht.info.Data != "div" {
+	b.Traverse(func(parent string, ht *HtmlToken) error {
+		if ht.Info.Data != "div" || parent != "form" {
 			return nil
 		}
 		switch val := in.(type) {
@@ -98,8 +98,8 @@ func (b *formElement) Add(in any) *formElement {
 }
 
 func (b *formElement) SetButtonText(text string) *formElement {
-	b.Traverse(func(ht *HtmlToken) error {
-		if ht.info.Data != "button" {
+	b.Traverse(func(parent string, ht *HtmlToken) error {
+		if ht.Info.Data != "button" {
 			return nil
 		}
 		if ht.GetAttr("type") != "submit" {

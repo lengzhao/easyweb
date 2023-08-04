@@ -53,13 +53,13 @@ func (b *carouselElement) Add(image, title, body string) *carouselElement {
 	if len(inner.children) == 0 {
 		bd.Attr("class", "carousel-item active")
 	}
-	bd.Traverse(func(ht *HtmlToken) error {
-		if ht.info.Data == "h5" {
+	bd.Traverse(func(parent string, ht *HtmlToken) error {
+		if ht.Info.Data == "h5" {
 			if title == "" {
 				ht.disable = true
 			}
 		}
-		if ht.info.Data == "p" {
+		if ht.Info.Data == "p" {
 			if body == "" {
 				ht.disable = true
 			}

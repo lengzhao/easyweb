@@ -51,8 +51,8 @@ func (p *easyPage) Write(e any) string {
 func (p *easyPage) WriteWithID(id string, e any) string {
 	msg := toClientMsgData{id, "", fmt.Sprint(e)}
 	p.sendMsg(msg)
-	if e, ok := e.(IEnableRegist); ok {
-		e.WillRegistEvent(p)
+	if e, ok := e.(IAfterLoaded); ok {
+		e.AfterElementLoadedFromFramwork(p)
 	}
 	return id
 }
@@ -67,8 +67,13 @@ func (p *easyPage) RegistEvent(id, typ string, cb IMessageCb) {
 	cbMsg.Event = cb
 	p.sendMsg(cbMsg)
 	// 2. add client event(jquery will handle the event)
-	toClient := toClientMsgData{id, "event", typ}
-	p.sendMsg(toClient)
+	if cb != nil {
+		toClient := toClientMsgData{id, "event", typ}
+		p.sendMsg(toClient)
+	} else {
+		toClient := toClientMsgData{id, "off", typ}
+		p.sendMsg(toClient)
+	}
 }
 
 func (p *easyPage) Refresh(e IGetID) {
@@ -150,7 +155,11 @@ func (p *easyPage) processMsg() {
 					}(msg.ID, out)
 				}
 			case eventMsgData:
-				p.callback[msg.ID] = msg
+				if msg.Event == nil {
+					delete(p.callback, msg.ID)
+				} else {
+					p.callback[msg.ID] = msg
+				}
 			default:
 				fmt.Println("unknown msg type:", msg)
 			}

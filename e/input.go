@@ -8,7 +8,7 @@ func InputGroup(name, text string) *inputElement {
 	out := &inputElement{}
 	out.parseText(`<div class="input-group">
 	<span class="input-group-text">` + text + `</span>
-	<input type="text" class="form-control" aria-label="" name="` + name + `"/>
+	<input type="text" class="form-control" aria-label="" name="` + name + `" required/>
 	<span class="input-group-text"></span>
   </div>`)
 	if text == "" {

@@ -41,7 +41,7 @@ func (b *tabsElement) Add(title string, body any) *tabsElement {
 	hd, _ := ParseHtml(`<button class="nav-link" id="` + hid + `" data-bs-toggle="tab" data-bs-target="#` + id + `" type="button" role="tab" aria-controls="` + id + `" aria-selected="true">` + title + `</button>`)
 	bd, _ := ParseHtml(`<div class="tab-pane fade" id="` + id + `" role="tabpanel" aria-labelledby="` + hid + `"></div>`)
 	bd.add(body)
-	b.Traverse(func(ht *HtmlToken) error {
+	b.Traverse(func(parent string, ht *HtmlToken) error {
 		if ht.GetAttr("role") == "tablist" {
 			if len(ht.children) == 0 {
 				hd.Attr("class", "nav-link active")

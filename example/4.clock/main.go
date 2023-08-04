@@ -12,13 +12,12 @@ func main() {
 		page.Title("MyWeb")
 		page.Write("<h1>easy clock</h1>")
 		t := time.Tick(time.Second)
-		for {
+		var id string
+		for i := 0; i < 10; i++ {
+			id = page.Write(time.Now().Local().String())
 			<-t
-			id := page.Write(time.Now().Local().String())
-			if id == "" {
-				break
-			}
 		}
+		page.WriteWithID(id, "the clock is stoped")
 	}, easyweb.DefaultPagePath...)
 	http.ListenAndServe(":8182", nil)
 

@@ -36,8 +36,8 @@ func Navbar(name string) *navbarElement {
     </div>
   </nav>`)
 	out.Attr("id", getID())
-	out.Traverse(func(ht *HtmlToken) error {
-		if ht.info.Data == "form" {
+	out.Traverse(func(parent string, ht *HtmlToken) error {
+		if ht.Info.Data == "form" {
 			ht.disable = true
 			return fmt.Errorf("finish")
 		}
@@ -47,8 +47,8 @@ func Navbar(name string) *navbarElement {
 }
 
 func (b *navbarElement) AddItem(item ...*HtmlToken) *navbarElement {
-	b.Traverse(func(ht *HtmlToken) error {
-		if ht.info.Data != "ul" {
+	b.Traverse(func(parent string, ht *HtmlToken) error {
+		if ht.Info.Data != "ul" || parent != "div" {
 			return nil
 		}
 		for _, it := range item {
@@ -75,8 +75,8 @@ func (b *navbarElement) Add(text, url string) *navbarElement {
 
 func (b *navbarElement) SetSearchCb(cb func(value string)) *navbarElement {
 	id := getID()
-	b.Traverse(func(ht *HtmlToken) error {
-		if ht.info.Data != "form" {
+	b.Traverse(func(parent string, ht *HtmlToken) error {
+		if ht.Info.Data != "form" {
 			return nil
 		}
 		if !ht.disable {
@@ -85,7 +85,7 @@ func (b *navbarElement) SetSearchCb(cb func(value string)) *navbarElement {
 		ht.Attr("id", id)
 		ht.children[0].Attr("name", id)
 		ht.disable = false
-		ht.SetCb("form", func(id string, data []byte) {
+		ht.SetCb("submit", func(id string, data []byte) {
 			info := make(map[string]string)
 			json.Unmarshal(data[1:], &info)
 			cb(info[id])

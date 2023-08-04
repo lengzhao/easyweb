@@ -19,6 +19,19 @@ func main() {
 			{"Larry", "the Bird"},
 		})
 		page.Write(table)
+
+		page.Write("<h1>Map Table</h1>")
+		page.Write(e.Map2Table(3, map[string]any{
+			"First":  "Mark",
+			"Last":   "Otto",
+			"Handle": "@mdo",
+			"Others": []any{"Jacob", "Thornton", "@fat", "Larry", "the Bird", "@twitter"},
+			"Map": map[string]any{
+				"First":  "Mark",
+				"Last":   "Otto",
+				"Handle": "@mdo",
+			},
+		}))
 	}, easyweb.DefaultPagePath...)
 	http.ListenAndServe(":8182", nil)
 }
