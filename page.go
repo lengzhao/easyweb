@@ -129,30 +129,26 @@ func (p *easyPage) processMsg() {
 			case fromClientMsgData:
 				cb := p.callback[msg.ID]
 				if cb.Event != nil {
-					out := []byte{byte(CbDataTypeString)}
-					out = append(out, []byte(msg.Msg)...)
-					go func(id string, data []byte) {
+					go func(id string, dataType CbDataType, data []byte) {
 						defer func() {
 							if r := recover(); r != nil {
 								fmt.Println("Recovered", r)
 							}
 						}()
-						cb.Event.MessageCallbackFromFramwork(msg.ID, out)
-					}(msg.ID, out)
+						cb.Event.MessageCallbackFromFramwork(msg.ID, dataType, data)
+					}(msg.ID, CbDataTypeString, []byte(msg.Msg))
 				}
 			case fileMsgData:
 				cb := p.callback[msg.ID]
 				if cb.Event != nil {
-					out := []byte{byte(CbDataTypeBinary)}
-					out = append(out, msg.BinaryData...)
-					go func(id string, data []byte) {
+					go func(id string, dataType CbDataType, data []byte) {
 						defer func() {
 							if r := recover(); r != nil {
 								fmt.Println("Recovered", r)
 							}
 						}()
-						cb.Event.MessageCallbackFromFramwork(msg.ID, out)
-					}(msg.ID, out)
+						cb.Event.MessageCallbackFromFramwork(msg.ID, dataType, data)
+					}(msg.ID, CbDataTypeBinary, msg.BinaryData)
 				}
 			case eventMsgData:
 				if msg.Event == nil {

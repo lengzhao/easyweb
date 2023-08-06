@@ -3,6 +3,8 @@ package e
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/lengzhao/easyweb"
 )
 
 type navbarElement struct {
@@ -85,9 +87,9 @@ func (b *navbarElement) SetSearchCb(cb func(value string)) *navbarElement {
 		ht.Attr("id", id)
 		ht.children[0].Attr("name", id)
 		ht.disable = false
-		ht.SetCb("submit", func(id string, data []byte) {
+		ht.SetCb("submit", func(id string, dataType easyweb.CbDataType, data []byte) {
 			info := make(map[string]string)
-			json.Unmarshal(data[1:], &info)
+			json.Unmarshal(data, &info)
 			cb(info[id])
 		})
 		return fmt.Errorf("finish")

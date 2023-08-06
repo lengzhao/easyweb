@@ -17,9 +17,12 @@ type formElement struct {
 func Form(cb func(id string, info map[string]string)) *formElement {
 	var out formElement
 	out.parseText(`<form>
-	<div>
-	</div>
-	<button type="submit" class="btn btn-primary">Submit</button>
+		<div>
+		</div>
+		<div class="d-flex justify-content-between">
+			<p></p>
+			<button type="submit" class="btn btn-primary ml-auto">Submit</button>
+		</div>
 	</form>`)
 	out.Attr("id", getID())
 	out.cb = cb
@@ -29,10 +32,10 @@ func Form(cb func(id string, info map[string]string)) *formElement {
 	return &out
 }
 
-func (b *formElement) eventCb(id string, data []byte) {
-	if data[0] != byte(easyweb.CbDataTypeString) {
+func (b *formElement) eventCb(id string, dataType easyweb.CbDataType, data []byte) {
+	if dataType == easyweb.CbDataTypeBinary {
 		if b.fileCb != nil {
-			b.fileCb(id, data[1:])
+			b.fileCb(id, data)
 		}
 		return
 	}
@@ -40,7 +43,7 @@ func (b *formElement) eventCb(id string, data []byte) {
 		return
 	}
 	info := make(map[string]string)
-	err := json.Unmarshal(data[1:], &info)
+	err := json.Unmarshal(data, &info)
 	if err != nil {
 		return
 	}

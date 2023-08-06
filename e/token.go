@@ -11,7 +11,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-type ICallback func(id string, data []byte)
+type ICallback func(id string, dataType easyweb.CbDataType, data []byte)
 
 type HtmlToken struct {
 	Info      html.Token
@@ -212,15 +212,15 @@ func getEventType2(in string) string {
 	}
 }
 
-func (n *HtmlToken) MessageCallbackFromFramwork(id string, data []byte) bool {
+func (n *HtmlToken) MessageCallbackFromFramwork(id string, dataType easyweb.CbDataType, data []byte) bool {
 	if id == n.GetAttr("id") {
 		if n.cb != nil {
-			n.cb(id, data)
+			n.cb(id, dataType, data)
 		}
 		return true
 	}
 	for _, child := range n.children {
-		if child.MessageCallbackFromFramwork(id, data) {
+		if child.MessageCallbackFromFramwork(id, dataType, data) {
 			return true
 		}
 	}

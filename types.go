@@ -55,7 +55,7 @@ type IGetID interface {
 }
 
 type IMessageCb interface {
-	MessageCallbackFromFramwork(id string, data []byte) bool
+	MessageCallbackFromFramwork(id string, dataType CbDataType, data []byte) bool
 }
 
 type PageFunc func(page Page)

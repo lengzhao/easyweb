@@ -93,7 +93,7 @@ func main() {
 			page.Write("button click:" + id + time.Now().String())
 		}))
 		label := e.Label("Click Label")
-		label.SetCb("click", func(id string, data []byte) {
+		label.SetCb("click", func(id string, dataType easyweb.CbDataType, data []byte) {
 			page.Write("label click:" + id + time.Now().String())
 		})
 		box3.Add(label)

@@ -16,7 +16,7 @@
 </head>
 
 <body>
-    <div class="container" id="container_id">
+    <div class="container" id="dynamic_container_id">
     </div>
 
     <script>
@@ -75,7 +75,7 @@
                         g = document.createElement('div');
                         g.setAttribute("id", obj.id);
                         g.innerHTML = obj.msg;
-                        $("div:first").append(g);
+                        $("#dynamic_container_id").append(g);
                     }
             }
         };
