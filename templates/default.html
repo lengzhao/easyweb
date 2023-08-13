@@ -70,7 +70,7 @@
                             // console.log("remove element", obj.id)
                             return
                         }
-                        $("#" + obj.id).html(obj.msg)
+                        $("#" + obj.id).replaceWith(obj.msg)
                     } else {
                         g = document.createElement('div');
                         g.setAttribute("id", obj.id);

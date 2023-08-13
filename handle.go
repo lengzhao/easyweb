@@ -32,8 +32,12 @@ var DefaultPagePath []string = []string{
 // Return:
 // - string: The WebSocket URL path for the registered page.
 func RegisterPage(pn PageFunc, path ...string) string {
-	pattern := make(map[string]bool)
 	pid := util.GetID()
+	return RegisterPageWithID(pid, pn, path...)
+}
+
+func RegisterPageWithID(pid string, pn PageFunc, path ...string) string {
+	pattern := make(map[string]bool)
 
 	for _, it := range path {
 		it = strings.TrimSpace(it)

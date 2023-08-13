@@ -12,7 +12,7 @@ type labelElement struct {
 
 func Label(text string) *labelElement {
 	out := labelElement{}
-	out.parseText(`<div></div>`)
+	out.parseText(`<label></label>`)
 	out.Attr("id", getID())
 	out.text = text
 	return &out
