@@ -58,6 +58,10 @@ func main() {
 			page.Write("button4 click:" + id + time.Now().String())
 		})
 		row.Add(dropdown)
+		pag := e.Pagination([]string{"<<", "1", "2", "3", "4", "5", ">>"}, func(id, item string) {
+			fmt.Println("pagination:", id, item)
+		}).Active("2")
+		row.Add(pag)
 		tabs.Add("Button", row)
 
 		box2 := e.Row()
@@ -108,6 +112,9 @@ func main() {
 
 		}))
 		tabs.Add("Event", box3)
+
+		modal := e.Modal("Open Modal", "Hello Modal").SetBody("Modal Body")
+		tabs.Add("Modal", modal)
 
 		page.Write(tabs)
 

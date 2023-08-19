@@ -92,7 +92,7 @@
                 case "button":
                 case "click":
                     $("#" + id).click(function () {
-                        var info = { type: "button", msg: "click", id: id }
+                        var info = { type:"click", msg:  $(this).text(), id: id }
                         console.log("click:", info)
                         ws.send(JSON.stringify(info));
                     });

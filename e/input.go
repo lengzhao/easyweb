@@ -1,5 +1,32 @@
 package e
 
+type InputType string
+
+const (
+	InputTypeButton   InputType = "button"
+	InputTypeCheckbox InputType = "checkbox"
+	InputTypeColor    InputType = "color"
+	InputTypeDate     InputType = "date"
+	InputTypeDatetime InputType = "datetime-local"
+	InputTypeEmail    InputType = "email"
+	InputTypeFile     InputType = "file"
+	InputTypeHidden   InputType = "hidden"
+	InputTypeImage    InputType = "image"
+	InputTypeMonth    InputType = "month"
+	InputTypeNumber   InputType = "number"
+	InputTypePassword InputType = "password"
+	InputTypeRadio    InputType = "radio"
+	InputTypeRange    InputType = "range"
+	InputTypeReset    InputType = "reset"
+	InputTypeSearch   InputType = "search"
+	InputTypeSubmit   InputType = "submit"
+	InputTypeTel      InputType = "tel"
+	InputTypeText     InputType = "text"
+	InputTypeTime     InputType = "time"
+	InputTypeUrl      InputType = "url"
+	InputTypeWeek     InputType = "week"
+)
+
 type inputElement struct {
 	HtmlToken
 }
@@ -25,12 +52,17 @@ func (e *inputElement) Suffix(text string) *inputElement {
 	return e
 }
 
-func (e *inputElement) ChangeType(text string) *inputElement {
-	e.children[1].Attr("type", text)
+func (e *inputElement) ChangeType(text InputType) *inputElement {
+	e.children[1].Attr("type", string(text))
 	return e
 }
 
 func (e *inputElement) Value(value string) *inputElement {
 	e.children[1].Attr("value", value)
+	return e
+}
+
+func (e *inputElement) ChangeSuffix(suffix *HtmlToken) *inputElement {
+	e.children[2] = suffix
 	return e
 }

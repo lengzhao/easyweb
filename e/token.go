@@ -18,6 +18,7 @@ type HtmlToken struct {
 	children  []*HtmlToken
 	parent    string
 	text      string
+	eventKey  string
 	eventType string
 	cb        ICallback
 	disable   bool
@@ -175,8 +176,11 @@ func (n *HtmlToken) SetCb(typ string, cb ICallback) *HtmlToken {
 	}
 	n.eventType = typ
 	n.cb = cb
-	if n.GetAttr("id") == "" {
-		n.Attr("id", util.GetID())
+	if n.eventKey == "" {
+		if n.GetAttr("id") == "" {
+			n.Attr("id", util.GetID())
+		}
+		n.eventKey = n.GetAttr("id")
 	}
 	// fmt.Println("set event callback:", n.GetAttr("id"), n.Info.Data, n.cb)
 	return n
@@ -189,8 +193,11 @@ func (n *HtmlToken) Self() *HtmlToken {
 
 func (n *HtmlToken) AfterElementLoadedFromFramwork(p easyweb.Page) {
 	// fmt.Println("try regist event:", n.GetAttr("id"), n.Info.Data, n.cb)
-	if n.cb != nil && n.GetAttr("id") != "" {
-		p.RegistEvent(n.GetAttr("id"), n.eventType, n)
+	if n.cb != nil {
+		if n.eventKey == "" {
+			n.eventKey = n.GetID()
+		}
+		p.RegistEvent(n.eventKey, n.eventType, n)
 	}
 	for _, child := range n.children {
 		child.AfterElementLoadedFromFramwork(p)
@@ -213,7 +220,7 @@ func getEventType2(in string) string {
 }
 
 func (n *HtmlToken) MessageCallbackFromFramwork(id string, dataType easyweb.CbDataType, data []byte) bool {
-	if id == n.GetAttr("id") {
+	if id == n.eventKey {
 		if n.cb != nil {
 			n.cb(id, dataType, data)
 		}
