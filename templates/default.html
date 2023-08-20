@@ -102,6 +102,17 @@
                         ws.send(JSON.stringify(info));
                     });
                     break
+                case "change":
+                    $("#" + id).on( "change", function () {
+                        var val = $(this).val()
+                        if (val.length == 0) {
+                            val = $(this).children("option").val()
+                        }
+                        var info = { type: "change", msg: val, id: id }
+                        console.log("click:", info)
+                        ws.send(JSON.stringify(info));
+                    });
+                    break
                 case "submit":
                 case "form":
                     $("#" + id).submit(function (event) {
