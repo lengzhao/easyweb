@@ -7,7 +7,6 @@ import (
 	"sync/atomic"
 
 	"github.com/lengzhao/easyweb"
-	"github.com/lengzhao/easyweb/util"
 	"golang.org/x/net/html"
 )
 
@@ -176,12 +175,6 @@ func (n *HtmlToken) SetCb(typ string, cb ICallback) *HtmlToken {
 	}
 	n.eventType = typ
 	n.cb = cb
-	if n.eventKey == "" {
-		if n.GetAttr("id") == "" {
-			n.Attr("id", util.GetID())
-		}
-		n.eventKey = n.GetAttr("id")
-	}
 	// fmt.Println("set event callback:", n.GetAttr("id"), n.Info.Data, n.cb)
 	return n
 }
