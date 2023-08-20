@@ -35,7 +35,7 @@ func InputGroup(name, text string) *inputElement {
 	out := &inputElement{}
 	out.parseText(`<div class="input-group">
 	<span class="input-group-text">` + text + `</span>
-	<input type="text" class="form-control" aria-label="` + name + `"/>
+	<input type="text" class="form-control" aria-label="` + name + `" required/>
 	<span class="input-group-text"></span>
   </div>`)
 	if text == "" {
@@ -75,7 +75,7 @@ func (e *inputElement) ChangeInput(in *HtmlToken) *inputElement {
 	return e
 }
 
-func (e *inputElement) Required() *inputElement {
-	e.children[1].Attr("required", "true")
+func (e *inputElement) Unrequired() *inputElement {
+	e.children[1].Attr("required", "")
 	return e
 }
