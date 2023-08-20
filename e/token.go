@@ -175,6 +175,10 @@ func (n *HtmlToken) SetCb(typ string, cb ICallback) *HtmlToken {
 	}
 	n.eventType = typ
 	n.cb = cb
+
+	if n.eventKey == "" && n.GetID() == "" {
+		n.Attr("id", getID())
+	}
 	// fmt.Println("set event callback:", n.GetAttr("id"), n.Info.Data, n.cb)
 	return n
 }
