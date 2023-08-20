@@ -35,13 +35,16 @@ func InputGroup(name, text string) *inputElement {
 	out := &inputElement{}
 	out.parseText(`<div class="input-group">
 	<span class="input-group-text">` + text + `</span>
-	<input type="text" class="form-control" aria-label="" name="` + name + `" required/>
+	<input type="text" class="form-control" aria-label="` + name + `"/>
 	<span class="input-group-text"></span>
   </div>`)
 	if text == "" {
 		out.children[0].disable = true
 	}
 	out.children[2].disable = true
+	if name != "" {
+		out.children[1].Attr("name", name)
+	}
 
 	return out
 }
@@ -69,5 +72,10 @@ func (e *inputElement) ChangeSuffix(suffix *HtmlToken) *inputElement {
 
 func (e *inputElement) ChangeInput(in *HtmlToken) *inputElement {
 	e.children[1] = in
+	return e
+}
+
+func (e *inputElement) Required() *inputElement {
+	e.children[1].Attr("required", "true")
 	return e
 }
