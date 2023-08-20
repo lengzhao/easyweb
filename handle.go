@@ -110,6 +110,7 @@ func (p *pageWs) HandleWs(w http.ResponseWriter, r *http.Request) {
 	page.callback = make(map[string]eventMsgData)
 	page.msgChan = make(chan any, 10)
 	page.closed = make(chan int)
+	page.env = make(map[string]any)
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {

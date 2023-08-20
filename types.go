@@ -1,6 +1,8 @@
 package easyweb
 
 import (
+	"sync"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -17,6 +19,9 @@ type Page interface {
 	WaitUntilClosed()
 	// regist element event after loaded
 	RegistEvent(id, typ string, cb IMessageCb)
+
+	SetEnv(key string, value any)
+	GetEnv(key string) any
 }
 
 type toClientMsgData struct {
@@ -48,6 +53,8 @@ type easyPage struct {
 	conn     *websocket.Conn
 	closed   chan int
 	msgChan  chan any
+	mu       sync.Mutex
+	env      map[string]any
 }
 
 type IGetID interface {

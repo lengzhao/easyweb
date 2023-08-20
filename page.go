@@ -100,6 +100,19 @@ func (p *easyPage) WaitUntilClosed() {
 	<-p.closed
 }
 
+func (p *easyPage) SetEnv(key string, value any) {
+	p.mu.Lock()
+	p.env[key] = value
+	p.mu.Unlock()
+}
+
+func (p *easyPage) GetEnv(key string) (value any) {
+	p.mu.Lock()
+	value = p.env[key]
+	p.mu.Unlock()
+	return
+}
+
 func encode(v interface{}) []byte {
 	buff := new(strings.Builder)
 	enc := json.NewEncoder(buff)
