@@ -260,6 +260,11 @@ func (n *HtmlToken) AddChild(child *HtmlToken) *HtmlToken {
 	n.children = append(n.children, child)
 	return n
 }
+func (n *HtmlToken) SetChild(child ...*HtmlToken) *HtmlToken {
+	n.children = nil
+	n.children = append(n.children, child...)
+	return n
+}
 
 func (n *HtmlToken) GetChilds() []*HtmlToken {
 	return n.children
