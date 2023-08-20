@@ -85,7 +85,12 @@
             switch (typ) {
                 case "input":
                     $("#" + id).on("input", function () {
-                        var info = { type: typ, msg: $(this).val(), id: id }
+                        var val = $(this).val()
+                        if (val.length == 0) {
+                            val = $(this).children("input").val()
+                        }
+                        console.log("input:",id, val)
+                        var info = { type: typ, msg: val, id: id }
                         ws.send(JSON.stringify(info));
                     });
                     break;
