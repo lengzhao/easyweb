@@ -57,6 +57,9 @@ func (e *inputElement) Suffix(text string) *inputElement {
 
 func (e *inputElement) ChangeType(text InputType) *inputElement {
 	e.children[1].Attr("type", string(text))
+	if text == InputTypeNumber {
+		e.children[1].Attr("step", "any")
+	}
 	return e
 }
 
