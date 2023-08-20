@@ -66,3 +66,8 @@ func (e *inputElement) ChangeSuffix(suffix *HtmlToken) *inputElement {
 	e.children[2] = suffix
 	return e
 }
+
+func (e *inputElement) ChangeInput(in *HtmlToken) *inputElement {
+	e.children[1] = in
+	return e
+}
