@@ -59,6 +59,7 @@ func (e *inputElement) ChangeType(text InputType) *inputElement {
 	e.children[1].Attr("type", string(text))
 	if text == InputTypeNumber {
 		e.children[1].Attr("step", "any")
+		e.children[1].Attr("inputmode", "decimal")
 	}
 	return e
 }
@@ -80,5 +81,10 @@ func (e *inputElement) ChangeInput(in *HtmlToken) *inputElement {
 
 func (e *inputElement) Unrequired() *inputElement {
 	e.children[1].Attr("required", "")
+	return e
+}
+
+func (e *inputElement) Hidden() *inputElement {
+	e.children[1].Attr("hidden", "true")
 	return e
 }

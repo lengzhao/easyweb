@@ -105,19 +105,14 @@ func (p *pageWs) HandleWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer c.Close()
-	var page easyPage
-	page.conn = c
-	page.callback = make(map[string]eventMsgData)
-	page.msgChan = make(chan any, 10)
-	page.closed = make(chan int)
-	page.env = make(map[string]any)
+	page := newPage(c)
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
 				fmt.Println("Recovered", r)
 			}
 		}()
-		p.cb(&page)
+		p.cb(page)
 	}()
 	go page.processMsg()
 	var lastID string

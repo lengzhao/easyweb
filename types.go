@@ -22,6 +22,7 @@ type Page interface {
 
 	SetEnv(key string, value any)
 	GetEnv(key string) any
+	WatchEnv(key string, cb func(value any)) error
 }
 
 type toClientMsgData struct {
@@ -55,6 +56,7 @@ type easyPage struct {
 	msgChan  chan any
 	mu       sync.Mutex
 	env      map[string]any
+	watchEnv map[string]func(value any)
 }
 
 type IGetID interface {

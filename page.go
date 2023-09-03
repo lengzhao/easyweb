@@ -11,6 +11,17 @@ import (
 
 var _ Page = &easyPage{}
 
+func newPage(conn *websocket.Conn) *easyPage {
+	var page easyPage
+	page.conn = conn
+	page.callback = make(map[string]eventMsgData)
+	page.msgChan = make(chan any, 10)
+	page.closed = make(chan int)
+	page.env = make(map[string]any)
+	page.watchEnv = make(map[string]func(value any))
+	return &page
+}
+
 func (p *easyPage) Title(title string) Page {
 	id := util.GetCallerID(util.LevelParent)
 	msg := toClientMsgData{id, "title", title}
@@ -103,7 +114,11 @@ func (p *easyPage) WaitUntilClosed() {
 func (p *easyPage) SetEnv(key string, value any) {
 	p.mu.Lock()
 	p.env[key] = value
+	cb := p.watchEnv[key]
 	p.mu.Unlock()
+	if cb != nil {
+		cb(value)
+	}
 }
 
 func (p *easyPage) GetEnv(key string) (value any) {
@@ -111,6 +126,16 @@ func (p *easyPage) GetEnv(key string) (value any) {
 	value = p.env[key]
 	p.mu.Unlock()
 	return
+}
+
+func (p *easyPage) WatchEnv(key string, cb func(value any)) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.watchEnv[key] != nil {
+		return fmt.Errorf("exist callback")
+	}
+	p.watchEnv[key] = cb
+	return nil
 }
 
 func encode(v interface{}) []byte {
