@@ -54,11 +54,19 @@ func (p *easyPage) AddCss(css string) Page {
 	return p
 }
 
+// e 将作为子元素放到div内，如<div id=rand_id>e</div>
 func (p *easyPage) Write(e any) string {
-	id := util.GetCallerID(util.LevelParent)
+	var id string
+	gid, ok := e.(IGetID)
+	if ok {
+		id = gid.GetID() + "_p"
+	} else {
+		id = util.GetCallerID(util.LevelParent)
+	}
 	return p.WriteWithID(id, e)
 }
 
+// e 将作为子元素放到id所属的元素内，如<div id=id>e</div>
 func (p *easyPage) WriteWithID(id string, e any) string {
 	msg := toClientMsgData{id, "", fmt.Sprint(e)}
 	p.sendMsg(msg)
@@ -68,6 +76,21 @@ func (p *easyPage) WriteWithID(id string, e any) string {
 	return id
 }
 
+type attrInfo struct {
+	Key   string `json:"key,omitempty"`
+	Value string `json:"value,omitempty"`
+}
+
+// 修改指定id的元素的属性
+func (p *easyPage) SetAttr(id, key, value string) string {
+	info := attrInfo{Key: key, Value: value}
+	data, _ := json.Marshal(info)
+	msg := toClientMsgData{id, "attr", string(data)}
+	p.sendMsg(msg)
+	return id
+}
+
+// 注册指定id的前端事件，typ是前端事件名，cb是回调还是，如果cb为空，则是取消事件回调
 func (p *easyPage) RegistEvent(id, typ string, cb IMessageCb) {
 	if id == "" || typ == "" {
 		return
@@ -85,11 +108,6 @@ func (p *easyPage) RegistEvent(id, typ string, cb IMessageCb) {
 		toClient := toClientMsgData{id, "off", typ}
 		p.sendMsg(toClient)
 	}
-}
-
-func (p *easyPage) Refresh(e IGetID) {
-	id := e.GetID()
-	p.WriteWithID(id, e)
 }
 
 func (p *easyPage) sendMsg(msg any) {

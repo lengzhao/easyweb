@@ -92,24 +92,27 @@ func main() {
 		}).Add(entry).Add(radio).Add(selectItem)
 		tabs.Add("Form", form)
 
-		box3 := e.Box()
+		box3 := e.Row()
 		box3.Add(e.Button("Click", func(id string) {
 			page.Write("button click:" + id + time.Now().String())
-		}))
+		})).Add(`<br/>`)
 		label := e.Label("Click Label")
 		label.SetCb("click", func(id string, dataType easyweb.CbDataType, data []byte) {
 			page.Write("label click:" + id + time.Now().String())
 		})
-		box3.Add(label)
+		box3.Add(label).Add(`<br/>`)
 		box3.Add(e.Button("RunJs From Server", func(id string) {
 			page.RunJs(`console.log("hello world. 123456")`)
 			page.Write(`run js:console.log("hello world. 123456")` + time.Now().String())
 
-		}))
-		box3.Add(e.Button("Off Event(unbind)", func(id string) {
+		})).Add(`<br/>`)
+		box3.Add(e.Button("Off Event(unbind self)", func(id string) {
 			page.Write(`event off:` + time.Now().String())
 			page.RegistEvent(id, "click", nil)
-
+		})).Add(`<br/>`)
+		box3.Add(e.Button("Color Change(setAttribute from server)", func(id string) {
+			page.SetAttr(id, "class", "btn btn-success")
+			page.Write(`Color Change to btn-success`)
 		}))
 		tabs.Add("Event", box3)
 

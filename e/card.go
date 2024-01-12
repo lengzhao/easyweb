@@ -32,7 +32,7 @@ func Card() *cardElement {
 		}
 		return nil
 	})
-	out.Attr("id", getID())
+	out.SetAttr("id", getID())
 	out.disable = false
 	return &out
 }
@@ -43,8 +43,8 @@ func (b *cardElement) Image(src, alt string) *cardElement {
 	}
 	b.Traverse(func(parent string, ht *HtmlToken) error {
 		if ht.Info.Data == "img" {
-			ht.Attr("src", src)
-			ht.Attr("alt", alt)
+			ht.SetAttr("src", src)
+			ht.SetAttr("alt", alt)
 			ht.disable = false
 			return fmt.Errorf("finish")
 		}
@@ -74,7 +74,7 @@ func (b *cardElement) Title(title, subTitle string) *cardElement {
 func (b *cardElement) Link(url, text string) *cardElement {
 	b.Traverse(func(parent string, ht *HtmlToken) error {
 		if ht.Info.Data == "a" {
-			ht.Attr("href", url)
+			ht.SetAttr("href", url)
 			ht.text = text
 			ht.children = nil
 			ht.disable = false

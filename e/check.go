@@ -17,6 +17,6 @@ func Check(name, text string) *checkElement {
 }
 
 func (e *checkElement) SetChecked() *checkElement {
-	e.children[0].Attr("checked", "true")
+	e.children[0].SetAttr("checked", "true")
 	return e
 }

@@ -34,12 +34,12 @@ func (b *carouselElement) Add(image, title, body string) *carouselElement {
 
 	hd, _ := ParseHtml(`<button type="button" data-bs-target="#" data-bs-slide-to="0" aria-label="Slide ` + fmt.Sprintf("%d", len(indicators.children)+1) + `"></button>`)
 	if len(indicators.children) == 0 {
-		hd.Attr("class", "active")
-		hd.Attr("aria-current", "true")
+		hd.SetAttr("class", "active")
+		hd.SetAttr("aria-current", "true")
 	}
-	hd.Attr("data-bs-target", "#"+b.id)
-	hd.Attr("data-bs-slide-to", fmt.Sprintf("%d", len(indicators.children)))
-	hd.Attr("aria-label", fmt.Sprintf("Slide %d", len(indicators.children)+1))
+	hd.SetAttr("data-bs-target", "#"+b.id)
+	hd.SetAttr("data-bs-slide-to", fmt.Sprintf("%d", len(indicators.children)))
+	hd.SetAttr("aria-label", fmt.Sprintf("Slide %d", len(indicators.children)+1))
 	indicators.add(hd)
 
 	inner := b.children[1]
@@ -51,7 +51,7 @@ func (b *carouselElement) Add(image, title, body string) *carouselElement {
             </div>
         </div>`)
 	if len(inner.children) == 0 {
-		bd.Attr("class", "carousel-item active")
+		bd.SetAttr("class", "carousel-item active")
 	}
 	bd.Traverse(func(parent string, ht *HtmlToken) error {
 		if ht.Info.Data == "h5" {

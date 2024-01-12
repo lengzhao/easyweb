@@ -49,7 +49,7 @@ func (b *dropdownElement) AddButton(text string, cb func(id string)) *dropdownEl
 			return nil
 		}
 		btn := Button(text, cb)
-		btn.Attr("class", "dropdown-item")
+		btn.SetAttr("class", "dropdown-item")
 		item, _ := ParseHtml(`<li></li>`)
 		item.add(btn)
 		ht.add(item)

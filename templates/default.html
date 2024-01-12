@@ -26,15 +26,12 @@
         }
         wsUrl = wsUrl + "//" + window.location.host + "/wss/{{.}}"
         var ws = new WebSocket(wsUrl);
-        // ws.onopen = function () {
-        // 	ws.send('{"id":"","msg":"open"}');
-        // };
 
         ws.onclose = function () {
             console.log("web socket is closed");
-            g = document.createElement('h3');
-            g.innerText = "the websocket is closed";
-            $("div:first").before(g);
+            // g = document.createElement('h3');
+            // g.innerText = "the websocket is closed";
+            // $("div:first").before(g);
         }
 
         ws.onmessage = function (e) {
@@ -61,6 +58,11 @@
                     break
                 case "eval":
                     eval(obj.msg);
+                    break
+                case "attr":
+                    var attr = JSON.parse(obj.msg);
+                    var element = document.getElementById(obj.id);
+                    element.setAttribute(attr.key, attr.value);
                     break
                 default:
                     var element = $("#" + obj.id);

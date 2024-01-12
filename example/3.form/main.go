@@ -20,7 +20,7 @@ func main() {
 			page.Write("form data:")
 			page.Write(info)
 			page.Write(time.Now().String())
-		}).Add(radio).Add(selectItem).AddInput("name8", "Name8"))
+		}).Add(radio).Add(selectItem).AddInput("name8", "Name8").Add(e.Textarea("textarea", "Textarea")))
 	}, easyweb.DefaultPagePath...)
 	http.ListenAndServe(":8182", nil)
 

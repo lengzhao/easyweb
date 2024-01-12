@@ -7,7 +7,7 @@ type accordionElement struct {
 func Accordion() *accordionElement {
 	var out accordionElement
 	out.parseText(`<div class="accordion"></div>`)
-	out.Attr("id", getID())
+	out.SetAttr("id", getID())
 	return &out
 }
 
@@ -28,8 +28,8 @@ func (e *accordionElement) AddItem(header, text string) *accordionElement {
   </div>`
 	item, _ := ParseHtml(tempText)
 	if len(e.children) == 0 {
-		item.children[0].children[0].Attr("aria-expanded", "true").Attr("class", "accordion-button")
-		item.children[1].Attr("class", "accordion-collapse collapse show")
+		item.children[0].children[0].SetAttr("aria-expanded", "true").SetAttr("class", "accordion-button")
+		item.children[1].SetAttr("class", "accordion-collapse collapse show")
 	}
 	e.add(item)
 

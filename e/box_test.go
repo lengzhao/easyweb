@@ -6,7 +6,7 @@ import (
 
 func TestBox(t *testing.T) {
 	it := Box("a", "b", "c")
-	it.Attr("id", "")
+	it.SetAttr("id", "")
 	if it.String() != `<div>abc</div>` {
 		t.Error("0", it.String())
 	}

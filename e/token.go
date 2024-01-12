@@ -129,8 +129,8 @@ func (n *HtmlToken) GetAttr(k string) string {
 	return ""
 }
 
-// set Attribute
-func (n *HtmlToken) Attr(k, v string) *HtmlToken {
+// set Attribute, if v=="",will remove it
+func (n *HtmlToken) SetAttr(k, v string) *HtmlToken {
 	attr := []html.Attribute{}
 	if v != "" {
 		attr = append(attr, html.Attribute{Key: k, Val: v})
@@ -148,12 +148,12 @@ func (n *HtmlToken) Attr(k, v string) *HtmlToken {
 func (n *HtmlToken) add(in ...any) *HtmlToken {
 	for _, it := range in {
 		switch val := it.(type) {
-		case []iSelf:
+		case []iBase:
 			for _, it := range val {
-				n.children = append(n.children, it.Self())
+				n.children = append(n.children, it.Base())
 			}
-		case iSelf:
-			n.children = append(n.children, val.Self())
+		case iBase:
+			n.children = append(n.children, val.Base())
 		default:
 			item := HtmlToken{}
 			item.text = fmt.Sprint(it)
@@ -163,11 +163,11 @@ func (n *HtmlToken) add(in ...any) *HtmlToken {
 	return n
 }
 
-type iSelf interface {
-	Self() *HtmlToken
+type iBase interface {
+	Base() *HtmlToken
 }
 
-var _ iSelf = &HtmlToken{}
+var _ iBase = &HtmlToken{}
 
 func (n *HtmlToken) SetCb(typ string, cb ICallback) *HtmlToken {
 	if typ == "" {
@@ -177,14 +177,14 @@ func (n *HtmlToken) SetCb(typ string, cb ICallback) *HtmlToken {
 	n.cb = cb
 
 	if n.eventKey == "" && n.GetID() == "" {
-		n.Attr("id", getID())
+		n.SetAttr("id", getID())
 	}
 	// fmt.Println("set event callback:", n.GetAttr("id"), n.Info.Data, n.cb)
 	return n
 }
 
-// Self returns the HtmlToken itself. easy 'Set' its subclasses, or will lost callback event
-func (n *HtmlToken) Self() *HtmlToken {
+// Base returns the HtmlToken itself. easy 'Set' its subclasses, or will lost callback event
+func (n *HtmlToken) Base() *HtmlToken {
 	return n
 }
 
@@ -259,12 +259,28 @@ func (n *HtmlToken) AddChild(child *HtmlToken) *HtmlToken {
 }
 func (n *HtmlToken) SetChild(child ...*HtmlToken) *HtmlToken {
 	n.children = nil
-	n.children = append(n.children, child...)
+	if len(child) > 0 {
+		n.children = append(n.children, child...)
+	}
 	return n
 }
 
 func (n *HtmlToken) GetChilds() []*HtmlToken {
 	return n.children
+}
+
+// Copy copy all element and clear the id
+func (n *HtmlToken) Copy() *HtmlToken {
+	if n == nil {
+		return nil
+	}
+	out := *n
+	out.children = nil
+	out.SetAttr("id", "")
+	for _, child := range n.children {
+		out.children = append(out.children, child.Copy())
+	}
+	return &out
 }
 
 func (n *HtmlToken) GetText() string {

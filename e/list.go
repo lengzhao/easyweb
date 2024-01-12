@@ -7,17 +7,18 @@ type listElement struct {
 func List(in ...any) *listElement {
 	var out listElement
 	out.parseText(`<ul class="list-group"></ul>`)
+	out.SetAttr("id", getID())
 	out.Add(in...)
 	return &out
 }
 
 func (e *listElement) ShowIndex() *listElement {
-	e.Attr("class", e.GetAttr("class")+" list-group-numbered")
+	e.SetAttr("class", e.GetAttr("class")+" list-group-numbered")
 	return e
 }
 
 func (e *listElement) Horizontal() *listElement {
-	e.Attr("class", e.GetAttr("class")+" list-group-horizontal")
+	e.SetAttr("class", e.GetAttr("class")+" list-group-horizontal")
 	return e
 }
 

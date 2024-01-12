@@ -29,7 +29,7 @@ func Table(head ...string) *tableElement {
 		}
 		return nil
 	})
-	out.Attr("id", getID())
+	out.SetAttr("id", getID())
 	return &out
 }
 
@@ -64,7 +64,7 @@ func (e *tableElement) BoldFirstRow() *tableElement {
 		}
 		for _, it := range ht.children {
 			it.children[0].Info.Data = "th"
-			it.children[0].Attr("scope", "row")
+			it.children[0].SetAttr("scope", "row")
 		}
 
 		return fmt.Errorf("finish")
@@ -85,6 +85,7 @@ func (e *tableElement) HiddenHead() *tableElement {
 	return e
 }
 
+// keyWidth: 0-6, total width is 12, 0:auto,
 func Map2Table(keyWidth int, in map[string]any) *tableElement {
 	t := Table("Key", "Value")
 	t.BoldFirstRow()
@@ -97,7 +98,7 @@ func Map2Table(keyWidth int, in map[string]any) *tableElement {
 		item := in[k]
 		switch val := item.(type) {
 		case []any:
-			element := List(val...).Attr("class", "list-group list-group-flush")
+			element := List(val...).SetAttr("class", "list-group list-group-flush")
 			t.AddLine([]any{k, element})
 		case map[string]any:
 			t.AddLine([]any{k, Map2Table(keyWidth, val).HiddenHead()})
@@ -116,7 +117,7 @@ func Map2Table(keyWidth int, in map[string]any) *tableElement {
 		if len(ht.children) == 0 {
 			return nil
 		}
-		ht.children[0].Attr("class", width)
+		ht.children[0].SetAttr("class", width)
 		return nil
 	})
 	return t

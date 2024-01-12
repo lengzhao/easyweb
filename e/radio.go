@@ -18,7 +18,7 @@ func Radio(name string) *radioElement {
 		name = util.GetCallerID(util.LevelParent)
 	}
 	out.name = name
-	out.Attr("id", getID())
+	out.SetAttr("id", getID())
 	return &out
 }
 
@@ -29,7 +29,7 @@ func (e *radioElement) Add(value, text string) *radioElement {
 	<label class="form-check-label" for="` + id + `">` + text + `</label>
   </div>`)
 	if len(e.children) == 0 {
-		item.children[0].Attr("checked", "true")
+		item.children[0].SetAttr("checked", "true")
 	}
 	e.add(item)
 
@@ -44,9 +44,9 @@ func (e *radioElement) Select(value string) *radioElement {
 		}
 		if ht.GetAttr("value") == value {
 			// fmt.Println("success to set:", ht.String())
-			ht.Attr("checked", "true")
+			ht.SetAttr("checked", "true")
 		} else {
-			ht.Attr("checked", "")
+			ht.SetAttr("checked", "")
 		}
 		return nil
 	})
@@ -63,7 +63,7 @@ func (e *radioElement) Inline() *radioElement {
 		if !strings.Contains(cls, "form-check") {
 			return nil
 		}
-		ht.Attr("class", "form-check form-check-inline")
+		ht.SetAttr("class", "form-check form-check-inline")
 		return nil
 	})
 	return e

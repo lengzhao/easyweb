@@ -10,25 +10,25 @@ func Video(url string) *videoElement {
 	out.parseText(`<div class="embed-responsive embed-responsive-16by9">
 	<iframe class="embed-responsive-item" src="` + url + `" allowfullscreen></iframe>
   </div>`)
-	out.Attr("id", getID())
+	out.SetAttr("id", getID())
 	return &out
 }
 
 func (e *videoElement) Aspect21by9() *videoElement {
-	e.Attr("class", "embed-responsive embed-responsive-21by9")
+	e.SetAttr("class", "embed-responsive embed-responsive-21by9")
 	return e
 }
 func (e *videoElement) Aspect4by3() *videoElement {
-	e.Attr("class", "embed-responsive embed-responsive-4by3")
+	e.SetAttr("class", "embed-responsive embed-responsive-4by3")
 	return e
 }
 
 func (e *videoElement) Aspect1by1() *videoElement {
-	e.Attr("class", "embed-responsive embed-responsive-1by1")
+	e.SetAttr("class", "embed-responsive embed-responsive-1by1")
 	return e
 }
 
 func (e *videoElement) Aspect16by9() *videoElement {
-	e.Attr("class", "embed-responsive embed-responsive-16by9")
+	e.SetAttr("class", "embed-responsive embed-responsive-16by9")
 	return e
 }

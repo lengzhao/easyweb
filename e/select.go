@@ -7,15 +7,15 @@ type selectElement struct {
 func Select(name string) *selectElement {
 	var out selectElement
 	out.parseText(`<select class="form-select" aria-label="Default select"></select>`)
-	out.Attr("id", getID())
-	out.Attr("name", name)
+	out.SetAttr("id", getID())
+	out.SetAttr("name", name)
 	return &out
 }
 
 func (e *selectElement) Add(value, text string) *selectElement {
 	item, _ := ParseHtml(`<option value="` + value + `">` + text + `</option>`)
 	if len(e.children) == 0 {
-		item.Attr("selected", "true")
+		item.SetAttr("selected", "true")
 	}
 	e.add(item)
 
@@ -30,9 +30,9 @@ func (e *selectElement) Select(value string) *selectElement {
 		}
 		if ht.GetAttr("value") == value {
 			// fmt.Println("success to set:", ht.String())
-			ht.Attr("selected", "true")
+			ht.SetAttr("selected", "true")
 		} else {
-			ht.Attr("selected", "")
+			ht.SetAttr("selected", "")
 		}
 		return nil
 	})

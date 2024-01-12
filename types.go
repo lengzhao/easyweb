@@ -13,7 +13,7 @@ type Page interface {
 	RunJs(js string) Page
 	Write(any) string
 	WriteWithID(string, any) string
-	Refresh(e IGetID)
+	SetAttr(id, key, value string) string
 	GetPeer() string
 	Close()
 	WaitUntilClosed()

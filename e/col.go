@@ -19,7 +19,7 @@ func Col(width int, item any) *colElement {
 	}
 
 	out.parseText(`<div class="` + cls + `"></div>`)
-	out.Attr("id", getID())
+	out.SetAttr("id", getID())
 	out.add(item)
 	return &out
 }

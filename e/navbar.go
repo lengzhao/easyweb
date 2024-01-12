@@ -37,7 +37,7 @@ func Navbar(name string) *navbarElement {
       </div>
     </div>
   </nav>`)
-	out.Attr("id", getID())
+	out.SetAttr("id", getID())
 	out.Traverse(func(parent string, ht *HtmlToken) error {
 		if ht.Info.Data == "form" {
 			ht.disable = true
@@ -56,9 +56,9 @@ func (b *navbarElement) AddItem(item ...*HtmlToken) *navbarElement {
 		for _, it := range item {
 			lit, _ := ParseHtml(`<li class="nav-item"></li>`)
 			if len(ht.children) == 0 {
-				it.Attr("class", it.GetAttr("class")+" nav-link active")
+				it.SetAttr("class", it.GetAttr("class")+" nav-link active")
 			} else {
-				it.Attr("class", it.GetAttr("class")+" nav-link")
+				it.SetAttr("class", it.GetAttr("class")+" nav-link")
 			}
 			lit.add(it)
 			ht.add(lit)
@@ -71,7 +71,7 @@ func (b *navbarElement) AddItem(item ...*HtmlToken) *navbarElement {
 
 func (b *navbarElement) Add(text, url string) *navbarElement {
 	it := Link(text, url)
-	b.AddItem(it.Self())
+	b.AddItem(it.Base())
 	return b
 }
 
@@ -84,8 +84,8 @@ func (b *navbarElement) SetSearchCb(cb func(value string)) *navbarElement {
 		if !ht.disable {
 			return nil
 		}
-		ht.Attr("id", id)
-		ht.children[0].Attr("name", id)
+		ht.SetAttr("id", id)
+		ht.children[0].SetAttr("name", id)
 		ht.disable = false
 		ht.SetCb("submit", func(id string, dataType easyweb.CbDataType, data []byte) {
 			info := make(map[string]string)

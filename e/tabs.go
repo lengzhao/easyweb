@@ -30,7 +30,7 @@ func Tabs() *tabsElement {
 			</div></nav>
 		<div class="tab-content">
 		</div></div>`)
-	out.Attr("id", getID())
+	out.SetAttr("id", getID())
 
 	return &out
 }
@@ -44,13 +44,13 @@ func (b *tabsElement) Add(title string, body any) *tabsElement {
 	b.Traverse(func(parent string, ht *HtmlToken) error {
 		if ht.GetAttr("role") == "tablist" {
 			if len(ht.children) == 0 {
-				hd.Attr("class", "nav-link active")
+				hd.SetAttr("class", "nav-link active")
 			}
 			ht.add(hd)
 		}
 		if ht.GetAttr("class") == "tab-content" {
 			if len(ht.children) == 0 {
-				bd.Attr("class", "tab-pane fade show active")
+				bd.SetAttr("class", "tab-pane fade show active")
 			}
 			ht.add(bd)
 			return fmt.Errorf("finish")

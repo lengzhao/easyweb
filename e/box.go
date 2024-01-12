@@ -7,7 +7,7 @@ type boxElement struct {
 func Box(items ...any) *boxElement {
 	out := boxElement{}
 	out.parseText(`<div></div>`)
-	out.Attr("id", getID())
+	out.SetAttr("id", getID())
 	out.add(items...)
 	return &out
 }

@@ -19,7 +19,7 @@ func Pagination(items []string, cb func(id, item string)) *paginationElement {
 	</ul>
   </nav>`)
 	id := getID()
-	out.Attr("id", id)
+	out.SetAttr("id", id)
 	out.Traverse(func(parent string, token *HtmlToken) error {
 		if token.Info.Data != "ul" {
 			return nil
@@ -50,7 +50,7 @@ func (e *paginationElement) Active(item string) *paginationElement {
 		}
 		token.Traverse(func(parent string, lt *HtmlToken) error {
 			if lt.GetText() == item {
-				token.Attr("class", "page-item active")
+				token.SetAttr("class", "page-item active")
 				finish = true
 				return fmt.Errorf("finish")
 			}

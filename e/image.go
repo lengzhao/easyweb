@@ -7,6 +7,6 @@ type imageElement struct {
 func Image(url string) *imageElement {
 	var out imageElement
 	out.parseText(`<img src="` + url + `" class="img-fluid" alt="...">`)
-	out.Attr("id", getID())
+	out.SetAttr("id", getID())
 	return &out
 }

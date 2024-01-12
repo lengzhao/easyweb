@@ -24,7 +24,7 @@ func Form(cb func(id string, info map[string]string)) *formElement {
 			<button type="submit" class="btn btn-primary ml-auto">Submit</button>
 		</div>
 	</form>`)
-	out.Attr("id", getID())
+	out.SetAttr("id", getID())
 	out.cb = cb
 	if cb != nil {
 		out.SetCb("submit", out.eventCb)
@@ -51,12 +51,12 @@ func (b *formElement) eventCb(id string, dataType easyweb.CbDataType, data []byt
 }
 
 func (b *formElement) Action(action, enctype string) *formElement {
-	b.Attr("action", action)
+	b.SetAttr("action", action)
 	if enctype == "" {
 		enctype = "multipart/form-data"
 	}
-	b.Attr("enctype", enctype)
-	b.Attr("method", http.MethodPost)
+	b.SetAttr("enctype", enctype)
+	b.SetAttr("method", http.MethodPost)
 	return b
 }
 
@@ -85,16 +85,7 @@ func (b *formElement) Add(in any) *formElement {
 		if ht.Info.Data != "div" || parent != "form" {
 			return nil
 		}
-		switch val := in.(type) {
-		case []iSelf:
-			for _, v := range val {
-				ht.add(v.Self())
-			}
-		case iSelf:
-			ht.add(val.Self())
-		default:
-			ht.add(in)
-		}
+		ht.add(in)
 		return fmt.Errorf("finish")
 	})
 	return b

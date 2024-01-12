@@ -21,7 +21,7 @@ func Sidebar(title string) *elementSidebar {
 	<div class="offcanvas-body">
 	</div>
   </div>`)
-	out.Attr("id", getID())
+	out.SetAttr("id", getID())
 	return &out
 }
 

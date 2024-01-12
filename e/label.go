@@ -13,13 +13,13 @@ type labelElement struct {
 func Label(text string) *labelElement {
 	out := labelElement{}
 	out.parseText(`<label></label>`)
-	out.Attr("id", getID())
+	out.SetAttr("id", getID())
 	out.text = text
 	return &out
 }
 
 func (e *labelElement) Set(text any) *labelElement {
-	e.text = fmt.Sprint(text)
+	// e.text = fmt.Sprint(text)
 	buff := new(bytes.Buffer)
 	template.HTMLEscape(buff, []byte(e.text))
 	e.text = buff.String()
