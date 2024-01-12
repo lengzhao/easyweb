@@ -65,15 +65,14 @@
                     element.setAttribute(attr.key, attr.value);
                     break
                 default:
-                    var element = $("#" + obj.id);
-                    if (element.length > 0) {
-                        if (obj.msg == 0) {
-                            $("#" + obj.id).remove();
-                            // console.log("remove element", obj.id)
+                    var element = document.getElementById(obj.id);
+                    if (element != null) {
+                        if (obj.msg.length == 0) {
+                            element.remove();
                             return
                         }
-                        $("#" + obj.id).replaceWith(obj.msg)
-                    } else {
+                        element.innerHTML = obj.msg;
+                    } else if (obj.msg.length > 0){
                         g = document.createElement('div');
                         g.setAttribute("id", obj.id);
                         g.innerHTML = obj.msg;
