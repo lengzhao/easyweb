@@ -85,7 +85,7 @@ func (e *tableElement) HiddenHead() *tableElement {
 	return e
 }
 
-// keyWidth: 0-6, total width is 12, 0:auto,
+// keyWidth: 0-12, total width is 12, 0:auto
 func Map2Table(keyWidth int, in map[string]any) *tableElement {
 	t := Table("Key", "Value")
 	t.BoldFirstRow()

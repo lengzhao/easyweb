@@ -13,6 +13,7 @@ type Page interface {
 	RunJs(js string) Page
 	Write(any) string
 	WriteWithID(string, any) string
+	Delete(string)
 	SetAttr(id, key, value string) string
 	GetPeer() string
 	Close()
@@ -59,8 +60,8 @@ type easyPage struct {
 	watchEnv map[string]func(value any)
 }
 
-type IGetID interface {
-	GetID() string
+type IContainerID interface {
+	ContainerID() string
 }
 
 type IMessageCb interface {

@@ -31,6 +31,6 @@ func (e *elementSidebar) GetButton() *HtmlToken {
 }
 
 func (e *elementSidebar) Add(in any) *elementSidebar {
-	e.children[2].add(in)
+	e.children[1].add(in)
 	return e
 }

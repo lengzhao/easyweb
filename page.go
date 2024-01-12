@@ -57,10 +57,11 @@ func (p *easyPage) AddCss(css string) Page {
 // e 将作为子元素放到div内，如<div id=rand_id>e</div>
 func (p *easyPage) Write(e any) string {
 	var id string
-	gid, ok := e.(IGetID)
+	gid, ok := e.(IContainerID)
 	if ok {
-		id = gid.GetID() + "_p"
-	} else {
+		id = gid.ContainerID()
+	}
+	if id == "" {
 		id = util.GetCallerID(util.LevelParent)
 	}
 	return p.WriteWithID(id, e)
@@ -70,10 +71,15 @@ func (p *easyPage) Write(e any) string {
 func (p *easyPage) WriteWithID(id string, e any) string {
 	msg := toClientMsgData{id, "", fmt.Sprint(e)}
 	p.sendMsg(msg)
-	if e, ok := e.(IAfterLoaded); ok {
-		e.AfterElementLoadedFromFramwork(p)
+	if evt, ok := e.(IAfterLoaded); ok {
+		evt.AfterElementLoadedFromFramwork(p)
 	}
 	return id
+}
+
+func (p *easyPage) Delete(id string) {
+	msg := toClientMsgData{id, "", ""}
+	p.sendMsg(msg)
 }
 
 type attrInfo struct {

@@ -13,14 +13,15 @@ import (
 type ICallback func(id string, dataType easyweb.CbDataType, data []byte)
 
 type HtmlToken struct {
-	Info      html.Token
-	children  []*HtmlToken
-	parent    string
-	text      string
-	eventKey  string
-	eventType string
-	cb        ICallback
-	disable   bool
+	Info        html.Token
+	children    []*HtmlToken
+	parent      string
+	text        string
+	eventKey    string
+	eventType   string
+	containerID string
+	cb          ICallback
+	disable     bool
 }
 
 func ParseHtml(text string) (*HtmlToken, error) {
@@ -265,6 +266,16 @@ func (n *HtmlToken) SetChild(child ...*HtmlToken) *HtmlToken {
 	return n
 }
 
+// If the same container id is set, the content will be updated when written multiple times.
+func (n *HtmlToken) SetContainerID(cid string) *HtmlToken {
+	n.containerID = cid
+	return n
+}
+
+func (n *HtmlToken) ContainerID() string {
+	return n.containerID
+}
+
 func (n *HtmlToken) GetChilds() []*HtmlToken {
 	return n.children
 }
@@ -276,6 +287,7 @@ func (n *HtmlToken) Copy() *HtmlToken {
 	}
 	out := *n
 	out.children = nil
+	out.containerID = ""
 	out.SetAttr("id", "")
 	for _, child := range n.children {
 		out.children = append(out.children, child.Copy())
