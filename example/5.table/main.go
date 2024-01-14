@@ -19,6 +19,12 @@ func main() {
 			{"Larry", "the Bird"},
 		})
 		page.Write(table)
+		page.Write(e.Button("UpdateTable", func(id string) {
+			table.AddValue([][]any{
+				{"Mark", "Otto", "@mdo"},
+			})
+			table.Refresh(page)
+		}))
 
 		page.Write("<h1>Map Table</h1>")
 		page.Write(e.Map2Table(3, map[string]any{

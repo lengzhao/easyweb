@@ -76,7 +76,7 @@
                         g = document.createElement('div');
                         g.setAttribute("id", obj.id);
                         g.innerHTML = obj.msg;
-                        $("#dynamic_container_id").append(g);
+                        document.getElementById("dynamic_container_id").appendChild(g);
                     }
             }
         };
@@ -110,7 +110,7 @@
                             val = $(this).children("option").val()
                         }
                         var info = { type: "change", msg: val, id: id }
-                        console.log("click:", info)
+                        console.log("change:", info)
                         ws.send(JSON.stringify(info));
                     });
                     break
@@ -129,7 +129,7 @@
                                 value[x] = f.name + ":" + f.size;
                             }
                         }
-                        console.log("form:", value)
+                        console.log("form:", id, value)
                         var info = { type: "form", msg: JSON.stringify(value), id: id }
                         // send form data
                         ws.send(JSON.stringify(info));

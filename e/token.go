@@ -350,3 +350,34 @@ func getID() string {
 	val := atomic.AddInt64(&lastId, 1)
 	return fmt.Sprintf("eid%04d", val)
 }
+
+func (n *HtmlToken) Refresh(p easyweb.Page) error {
+	// fmt.Println("try regist event:", n.GetAttr("id"), n.Info.Data, n.cb)
+	id := n.GetID()
+	if id == "" {
+		return fmt.Errorf("Refresh requires setting id")
+	}
+	var attrs string
+	for _, it := range n.Info.Attr {
+		if it.Key == "id" {
+			continue
+		}
+		if booleanAttributes[it.Key] {
+			attrs += fmt.Sprintf(`document.getElementById("%s")."%s"=true;`, id, it.Key)
+		} else {
+			attrs += fmt.Sprintf(`document.getElementById("%s").setAttribute("%s","%s");`, id, it.Key, it.Val)
+		}
+	}
+	if len(attrs) > 0 {
+		p.RunJs(attrs)
+	}
+
+	var childInfo string
+	for _, it := range n.children {
+		childInfo += it.String()
+	}
+	if len(childInfo) > 0 {
+		p.WriteWithID(id, childInfo)
+	}
+	return nil
+}
