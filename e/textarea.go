@@ -39,7 +39,7 @@ func (e *textareaElement) Rows(num uint) *textareaElement {
 
 func (e *textareaElement) Set(text string) *textareaElement {
 	buff := new(bytes.Buffer)
-	template.HTMLEscape(buff, []byte(e.text))
+	template.HTMLEscape(buff, []byte(text))
 	e.children[1].text = buff.String()
 	return e
 }
