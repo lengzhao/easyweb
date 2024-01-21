@@ -85,11 +85,13 @@ func main() {
 		entry := e.InputGroup("name", "Name")
 		radio := e.Radio("radio1").Add("name1", "text1").Add("name2", "text2").Add("name3", "text3").Inline().Select("name2")
 		selectItem := e.Select("select1").Add("s1", "s1").Add("s2", "s2").Add("s3", "s3").Select("s2")
+		datalist := e.Datalist("datalist", "Datalist")
+		datalist.Add("value1", "value2", "San Francisco", "New York")
 		form := e.Form(func(id string, info map[string]string) {
 			fmt.Println("form data:", info)
 			page.Write("form data:")
 			page.Write(info)
-		}).Add(entry).Add(radio).Add(selectItem)
+		}).Add(entry).Add(radio).Add(selectItem).Add(datalist)
 		tabs.Add("Form", form)
 
 		box3 := e.Row()

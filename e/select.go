@@ -1,5 +1,7 @@
 package e
 
+import "fmt"
+
 type selectElement struct {
 	HtmlToken
 }
@@ -36,5 +38,24 @@ func (e *selectElement) Select(value string) *selectElement {
 		}
 		return nil
 	})
+	return e
+}
+
+func (e *selectElement) SetMultiple(multiple bool) *selectElement {
+	if multiple {
+		e.SetAttr("multiple", "true")
+	} else {
+		e.SetAttr("multiple", "")
+	}
+	return e
+}
+
+// show size(rows)
+func (e *selectElement) SetSize(size uint) *selectElement {
+	if size > 0 {
+		e.SetAttr("size", fmt.Sprintf("%d", size))
+	} else {
+		e.SetAttr("size", "")
+	}
 	return e
 }
