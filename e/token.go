@@ -376,8 +376,10 @@ func (n *HtmlToken) Refresh(p easyweb.Page) error {
 	for _, it := range n.children {
 		childInfo += it.String()
 	}
-	if len(childInfo) > 0 {
-		p.WriteWithID(id, childInfo)
+	childInfo += n.text
+	if len(childInfo) == 0 {
+		childInfo = " "
 	}
+	p.WriteWithID(id, childInfo)
 	return nil
 }

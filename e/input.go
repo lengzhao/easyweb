@@ -45,6 +45,7 @@ func InputGroup(name, text string) *inputElement {
 	if name != "" {
 		out.children[1].SetAttr("name", name)
 	}
+	out.SetAttr("id", getID())
 
 	return out
 }

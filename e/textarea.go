@@ -12,14 +12,14 @@ type textareaElement struct {
 
 func Textarea(name, title string) *textareaElement {
 	var out textareaElement
-	id := getID()
-	out.parseText(`<div class="input-group" id="` + id + `">
+	out.parseText(`<div class="input-group">
 	<span class="input-group-text">` + title + `</span>
 	<textarea type="text" class="form-control" aria-label="` + name + `"> </textarea>
   </div>`)
 	if name != "" {
 		out.children[1].SetAttr("name", name)
 	}
+	out.SetAttr("id", getID())
 	return &out
 }
 

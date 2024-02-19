@@ -28,6 +28,7 @@ func Modal(btnText, title string) *modalElement {
 	</div>
   </div>
   </div>`)
+	out.SetAttr("id", getID())
 
 	return &out
 }

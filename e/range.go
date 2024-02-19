@@ -13,7 +13,7 @@ func RangeInput(name, text string) *rangeElement {
 	id := getID()
 	out.parseText(`<div  class="input-group"><label for="` + id + `" class="input-group-text">` + text + `</label>
 	<input type="range" class="form-range form-control" min="0" max="10" step="1" name="` + name + `" id="` + id + `" oninput="this.nextElementSibling.value = this.value"><output class="input-group-text"></output></div>`)
-	out.SetAttr("id", id)
+	out.SetAttr("id", getID())
 	return &out
 }
 

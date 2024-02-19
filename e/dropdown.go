@@ -14,6 +14,7 @@ func Dropdown(text string) *dropdownElement {
 	<ul class="dropdown-menu" aria-labelledby="` + id + `">
 	</ul>
   </div>`)
+	out.SetAttr("id", getID())
 	return &out
 }
 
