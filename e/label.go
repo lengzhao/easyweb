@@ -19,9 +19,9 @@ func Label(text string) *labelElement {
 }
 
 func (e *labelElement) Set(text any) *labelElement {
-	// e.text = fmt.Sprint(text)
+	e.text = fmt.Sprint(text)
 	buff := new(bytes.Buffer)
-	template.HTMLEscape(buff, []byte(text))
+	template.HTMLEscape(buff, []byte(e.text))
 	e.text = buff.String()
 	return e
 }
