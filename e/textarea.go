@@ -40,6 +40,13 @@ func (e *textareaElement) Rows(num uint) *textareaElement {
 func (e *textareaElement) Set(text string) *textareaElement {
 	buff := new(bytes.Buffer)
 	template.HTMLEscape(buff, []byte(text))
-	e.children[1].text = buff.String()
+	e.children[1].SetText(buff.String())
+	return e
+}
+
+func (e *textareaElement) AddText(text string) *textareaElement {
+	buff := new(bytes.Buffer)
+	template.HTMLEscape(buff, []byte(text))
+	e.children[1].SetText(e.children[1].GetText() + buff.String())
 	return e
 }

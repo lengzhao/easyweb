@@ -11,7 +11,7 @@ func main() {
 	easyweb.RegisterPage(func(page easyweb.Page) {
 		page.Title("MyWeb")
 		page.Write("<h1>Table</h1>")
-		table := e.Table("First", "Last", "Handle").BoldFirstRow()
+		table := e.Table("First", "Last", "Handle")
 		table.AddValue([][]any{
 			{"Mark", "Otto", "@mdo"},
 			{"Jacob", "Thornton", "@fat"},
@@ -19,7 +19,7 @@ func main() {
 			{"Larry", "the Bird"},
 		})
 		page.Write(table)
-		page.Write(e.Button("UpdateTable", func(id string) {
+		page.Write(e.Button("UpdateTable", func(p easyweb.Page, id string) {
 			table.AddValue([][]any{
 				{"Mark", "Otto", "@mdo"},
 			})

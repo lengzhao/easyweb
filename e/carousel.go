@@ -31,16 +31,16 @@ func Carousel() *carouselElement {
 
 func (b *carouselElement) Add(image, title, body string) *carouselElement {
 	indicators := b.children[0]
-
-	hd, _ := ParseHtml(`<button type="button" data-bs-target="#" data-bs-slide-to="0" aria-label="Slide ` + fmt.Sprintf("%d", len(indicators.children)+1) + `"></button>`)
-	if len(indicators.children) == 0 {
+	ic := indicators.GetChilds()
+	hd, _ := ParseHtml(`<button type="button" data-bs-target="#" data-bs-slide-to="0" aria-label="Slide ` + fmt.Sprintf("%d", len(ic)+1) + `"></button>`)
+	if len(ic) == 0 {
 		hd.SetAttr("class", "active")
 		hd.SetAttr("aria-current", "true")
 	}
 	hd.SetAttr("data-bs-target", "#"+b.id)
-	hd.SetAttr("data-bs-slide-to", fmt.Sprintf("%d", len(indicators.children)))
-	hd.SetAttr("aria-label", fmt.Sprintf("Slide %d", len(indicators.children)+1))
-	indicators.add(hd)
+	hd.SetAttr("data-bs-slide-to", fmt.Sprintf("%d", len(ic)))
+	hd.SetAttr("aria-label", fmt.Sprintf("Slide %d", len(ic)+1))
+	indicators.Add(hd)
 
 	inner := b.children[1]
 	bd, _ := ParseHtml(`<div class="carousel-item">
@@ -50,22 +50,22 @@ func (b *carouselElement) Add(image, title, body string) *carouselElement {
                 <p>` + body + `</p>
             </div>
         </div>`)
-	if len(inner.children) == 0 {
+	if len(ic) == 0 {
 		bd.SetAttr("class", "carousel-item active")
 	}
-	bd.Traverse(func(parent string, ht *HtmlToken) error {
-		if ht.Info.Data == "h5" {
+	bd.Traverse(nil, func(parent, ht IElement) error {
+		if ht.HtmlToken().Data == "h5" {
 			if title == "" {
-				ht.disable = true
+				ht.SetAttr("hidden", "true")
 			}
 		}
-		if ht.Info.Data == "p" {
+		if ht.HtmlToken().Data == "p" {
 			if body == "" {
-				ht.disable = true
+				ht.SetAttr("hidden", "true")
 			}
 		}
 		return nil
 	})
-	inner.add(bd)
+	inner.Add(bd)
 	return b
 }

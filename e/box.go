@@ -4,14 +4,10 @@ type boxElement struct {
 	HtmlToken
 }
 
-func Box(items ...any) *boxElement {
+func Box(items ...any) IElement {
 	out := boxElement{}
 	out.parseText(`<div></div>`)
 	out.SetAttr("id", getID())
-	out.add(items...)
-	return &out
-}
-
-func (e *boxElement) Add(items ...any) {
-	e.add(items...)
+	out.AddAny(items...)
+	return &out.HtmlToken
 }

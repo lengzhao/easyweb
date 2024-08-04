@@ -32,6 +32,6 @@ func (b *rangeElement) SetRange(min, max, step int) *rangeElement {
 
 func (b *rangeElement) SetValue(value int) *rangeElement {
 	b.children[1].SetAttr("value", fmt.Sprint(value))
-	b.children[2].text = fmt.Sprint(value)
+	b.children[2].SetText(fmt.Sprint(value))
 	return b
 }

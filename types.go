@@ -65,7 +65,7 @@ type IContainerID interface {
 }
 
 type IMessageCb interface {
-	MessageCallbackFromFramwork(id string, dataType CbDataType, data []byte) bool
+	MessageCallbackFromFramwork(page Page, id string, dataType CbDataType, data []byte) bool
 }
 
 type PageFunc func(page Page)

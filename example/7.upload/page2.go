@@ -23,12 +23,12 @@ func page2() {
 
 		fileInput := e.InputGroup("file1", "File").ChangeType("file")
 
-		form := e.Form(func(id string, info map[string]string) {
+		form := e.Form(func(p easyweb.Page, id string, info map[string]string) {
 			log.Panicln("hope not any event")
 		})
 		form.SetAttr("id", "")
-		form.Add(fileInput).Action(uploadPath, "")
-		form.SetFileCb(func(id string, data []byte) {
+		form.AddItem(fileInput).Action(uploadPath, "")
+		form.SetFileCb(func(p easyweb.Page, id string, data []byte) {
 			log.Panicln("hope not any file")
 		})
 		page.Write(form)

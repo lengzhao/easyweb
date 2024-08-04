@@ -25,15 +25,14 @@ func (c cardElement) Data() string {
 func Card() *cardElement {
 	out := cardElement{}
 	out.parseText(out.Data())
-	out.Traverse(func(parent string, ht *HtmlToken) error {
-		switch ht.Info.Data {
+	out.Traverse(nil, func(parent IElement, ht IElement) error {
+		switch ht.HtmlToken().Data {
 		case "img", "a", "p", "h5", "h6":
-			ht.disable = true
+			ht.SetAttr("hidden", "true")
 		}
 		return nil
 	})
 	out.SetAttr("id", getID())
-	out.disable = false
 	return &out
 }
 
@@ -41,11 +40,11 @@ func (b *cardElement) Image(src, alt string) *cardElement {
 	if src == "" {
 		return b
 	}
-	b.Traverse(func(parent string, ht *HtmlToken) error {
-		if ht.Info.Data == "img" {
+	b.Traverse(nil, func(parent, ht IElement) error {
+		if ht.HtmlToken().Data == "img" {
 			ht.SetAttr("src", src)
 			ht.SetAttr("alt", alt)
-			ht.disable = false
+			ht.SetAttr("hidden", "")
 			return fmt.Errorf("finish")
 		}
 		return nil
@@ -54,16 +53,16 @@ func (b *cardElement) Image(src, alt string) *cardElement {
 }
 
 func (b *cardElement) Title(title, subTitle string) *cardElement {
-	b.Traverse(func(parent string, ht *HtmlToken) error {
-		if ht.Info.Data == "h5" {
-			ht.text = title
-			ht.children = nil
-			ht.disable = false
+	b.Traverse(nil, func(parent, ht IElement) error {
+		if ht.HtmlToken().Data == "h5" {
+			ht.SetChild()
+			ht.SetText(title)
+			ht.SetAttr("hidden", "")
 		}
-		if ht.Info.Data == "h6" {
-			ht.text = subTitle
-			ht.children = nil
-			ht.disable = false
+		if ht.HtmlToken().Data == "h6" {
+			ht.SetChild()
+			ht.SetText(title)
+			ht.SetAttr("hidden", "")
 			return fmt.Errorf("finish")
 		}
 		return nil
@@ -72,12 +71,12 @@ func (b *cardElement) Title(title, subTitle string) *cardElement {
 }
 
 func (b *cardElement) Link(url, text string) *cardElement {
-	b.Traverse(func(parent string, ht *HtmlToken) error {
-		if ht.Info.Data == "a" {
+	b.Traverse(nil, func(parent, ht IElement) error {
+		if ht.HtmlToken().Data == "a" {
 			ht.SetAttr("href", url)
-			ht.text = text
-			ht.children = nil
-			ht.disable = false
+			ht.SetChild()
+			ht.SetText(text)
+			ht.SetAttr("hidden", "")
 			return fmt.Errorf("finish")
 		}
 		return nil
@@ -86,11 +85,11 @@ func (b *cardElement) Link(url, text string) *cardElement {
 }
 
 func (b *cardElement) Text(in any) *cardElement {
-	b.Traverse(func(parent string, ht *HtmlToken) error {
-		if ht.Info.Data == "p" {
-			ht.text = fmt.Sprint(in)
-			ht.children = nil
-			ht.disable = false
+	b.Traverse(nil, func(parent, ht IElement) error {
+		if ht.HtmlToken().Data == "p" {
+			ht.SetChild()
+			ht.SetText(fmt.Sprint(in))
+			ht.SetAttr("hidden", "")
 			return fmt.Errorf("finish")
 		}
 		return nil

@@ -8,7 +8,7 @@ func List(in ...any) *listElement {
 	var out listElement
 	out.parseText(`<ul class="list-group"></ul>`)
 	out.SetAttr("id", getID())
-	out.Add(in...)
+	out.AddItems(in...)
 	return &out
 }
 
@@ -22,11 +22,11 @@ func (e *listElement) Horizontal() *listElement {
 	return e
 }
 
-func (b *listElement) Add(in ...any) *listElement {
+func (b *listElement) AddItems(in ...any) *listElement {
 	for _, v := range in {
 		item, _ := ParseHtml(`<li class="list-group-item"></li>`)
-		item.add(v)
-		b.add(item)
+		item.AddAny(v)
+		b.Add(item)
 	}
 	return b
 }

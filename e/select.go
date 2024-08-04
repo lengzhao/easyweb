@@ -14,20 +14,20 @@ func Select(name string) *selectElement {
 	return &out
 }
 
-func (e *selectElement) Add(value, text string) *selectElement {
+func (e *selectElement) AddItem(value, text string) *selectElement {
 	item, _ := ParseHtml(`<option value="` + value + `">` + text + `</option>`)
 	if len(e.children) == 0 {
 		item.SetAttr("selected", "true")
 	}
-	e.add(item)
+	e.Add(item)
 
 	return e
 }
 
 func (e *selectElement) Select(value string) *selectElement {
 	// fmt.Println("set select:", value)
-	e.Traverse(func(parent string, ht *HtmlToken) error {
-		if ht.Info.Data != "option" || parent != "select" {
+	e.Traverse(nil, func(parent, ht IElement) error {
+		if parent == nil || ht.HtmlToken().Data != "option" || parent.HtmlToken().Data != "select" {
 			return nil
 		}
 		if ht.GetAttr("value") == value {

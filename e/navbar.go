@@ -30,7 +30,7 @@ func Navbar(name string) *navbarElement {
       <div class="collapse navbar-collapse" id="` + sid + `">
         <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
         </ul>
-		<form class="d-flex">
+		<form class="d-flex" hidden>
 			<input class="form-control me-2" type="search" placeholder="Search" name="" aria-label="Search"/>
 			<button class="btn btn-outline-success" type="submit">Search</button>
 		</form>
@@ -38,30 +38,23 @@ func Navbar(name string) *navbarElement {
     </div>
   </nav>`)
 	out.SetAttr("id", getID())
-	out.Traverse(func(parent string, ht *HtmlToken) error {
-		if ht.Info.Data == "form" {
-			ht.disable = true
-			return fmt.Errorf("finish")
-		}
-		return nil
-	})
 	return &out
 }
 
-func (b *navbarElement) AddItem(item ...*HtmlToken) *navbarElement {
-	b.Traverse(func(parent string, ht *HtmlToken) error {
-		if ht.Info.Data != "ul" || parent != "div" {
+func (b *navbarElement) AddItem(item ...IElement) *navbarElement {
+	b.Traverse(nil, func(parent, ht IElement) error {
+		if parent == nil || ht.HtmlToken().Data != "ul" || parent.HtmlToken().Data != "div" {
 			return nil
 		}
 		for _, it := range item {
 			lit, _ := ParseHtml(`<li class="nav-item"></li>`)
-			if len(ht.children) == 0 {
+			if len(ht.GetChilds()) == 0 {
 				it.SetAttr("class", it.GetAttr("class")+" nav-link active")
 			} else {
 				it.SetAttr("class", it.GetAttr("class")+" nav-link")
 			}
-			lit.add(it)
-			ht.add(lit)
+			lit.Add(it)
+			ht.Add(lit)
 		}
 		return fmt.Errorf("finish")
 	})
@@ -71,26 +64,26 @@ func (b *navbarElement) AddItem(item ...*HtmlToken) *navbarElement {
 
 func (b *navbarElement) Add(text, url string) *navbarElement {
 	it := Link(text, url)
-	b.AddItem(it.Base())
+	b.AddItem(&it.HtmlToken)
 	return b
 }
 
-func (b *navbarElement) SetSearchCb(cb func(value string)) *navbarElement {
+func (b *navbarElement) SetSearchCb(cb func(p easyweb.Page, value string)) *navbarElement {
 	id := getID()
-	b.Traverse(func(parent string, ht *HtmlToken) error {
-		if ht.Info.Data != "form" {
-			return nil
-		}
-		if !ht.disable {
+	b.Traverse(nil, func(parent, ht IElement) error {
+		if ht.HtmlToken().Data != "form" {
 			return nil
 		}
 		ht.SetAttr("id", id)
-		ht.children[0].SetAttr("name", id)
-		ht.disable = false
-		ht.SetCb("submit", func(id string, dataType easyweb.CbDataType, data []byte) {
+		child := ht.GetChilds()
+		if len(child) > 0 {
+			child[0].SetAttr("name", id)
+		}
+		ht.SetAttr("hidden", "")
+		ht.SetCb("submit", func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
 			info := make(map[string]string)
 			json.Unmarshal(data, &info)
-			cb(info[id])
+			cb(p, info[id])
 		})
 		return fmt.Errorf("finish")
 	})

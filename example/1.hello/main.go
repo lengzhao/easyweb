@@ -17,12 +17,18 @@ func main() {
 		page.AddCss("/static/css/format2.css")
 		page.Write(e.InputGroup("333", "@BBB").Suffix("$$$$"))
 		var count int
-		page.Write(e.Button("Click", func(id string) {
+		page.Write(e.Button("Click", func(p easyweb.Page, id string) {
 			fmt.Println("button click001:", id)
 			count++
 			page.Write("button click:" + fmt.Sprint(count))
 			page.Write(time.Now().String())
 		}))
+		page.Write(e.Box(e.Button("Click2", func(p easyweb.Page, id string) {
+			fmt.Println("button2 click001:", id)
+			count++
+			page.Write("button2 click:" + fmt.Sprint(count))
+			page.Write(time.Now().String())
+		})))
 	}, easyweb.DefaultPagePath...)
 	http.ListenAndServe(":8182", nil)
 

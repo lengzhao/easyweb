@@ -10,11 +10,11 @@ import (
 
 type formElement struct {
 	HtmlToken
-	cb     func(id string, info map[string]string)
-	fileCb func(id string, data []byte)
+	cb     func(p easyweb.Page, id string, info map[string]string)
+	fileCb func(p easyweb.Page, id string, data []byte)
 }
 
-func Form(cb func(id string, info map[string]string)) *formElement {
+func Form(cb func(p easyweb.Page, id string, info map[string]string)) *formElement {
 	var out formElement
 	out.parseText(`<form>
 		<div>
@@ -32,10 +32,10 @@ func Form(cb func(id string, info map[string]string)) *formElement {
 	return &out
 }
 
-func (b *formElement) eventCb(id string, dataType easyweb.CbDataType, data []byte) {
+func (b *formElement) eventCb(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
 	if dataType == easyweb.CbDataTypeBinary {
 		if b.fileCb != nil {
-			b.fileCb(id, data)
+			b.fileCb(p, id, data)
 		}
 		return
 	}
@@ -47,7 +47,7 @@ func (b *formElement) eventCb(id string, dataType easyweb.CbDataType, data []byt
 	if err != nil {
 		return
 	}
-	b.cb(id, info)
+	b.cb(p, id, info)
 }
 
 func (b *formElement) Action(action, enctype string) *formElement {
@@ -60,7 +60,7 @@ func (b *formElement) Action(action, enctype string) *formElement {
 	return b
 }
 
-func (b *formElement) SetFileCb(cb func(id string, data []byte)) *formElement {
+func (b *formElement) SetFileCb(cb func(p easyweb.Page, id string, data []byte)) *formElement {
 	b.fileCb = cb
 	if cb != nil {
 		b.SetCb("submit", b.eventCb)
@@ -70,37 +70,37 @@ func (b *formElement) SetFileCb(cb func(id string, data []byte)) *formElement {
 
 func (b *formElement) AddInput(name, text string) *formElement {
 	item := InputGroup(name, text)
-	b.Traverse(func(parent string, ht *HtmlToken) error {
-		if ht.Info.Data != "div" || parent != "form" {
+	b.Traverse(nil, func(parent, ht IElement) error {
+		if parent == nil || ht.HtmlToken().Data != "div" || parent.HtmlToken().Data != "form" {
 			return nil
 		}
-		ht.add(item)
+		ht.Add(&item.HtmlToken)
 		return fmt.Errorf("finish")
 	})
 	return b
 }
 
-func (b *formElement) Add(in any) *formElement {
-	b.Traverse(func(parent string, ht *HtmlToken) error {
-		if ht.Info.Data != "div" || parent != "form" {
+func (b *formElement) AddItem(in any) *formElement {
+	b.Traverse(nil, func(parent, ht IElement) error {
+		if parent == nil || ht.HtmlToken().Data != "div" || parent.HtmlToken().Data != "form" {
 			return nil
 		}
-		ht.add(in)
+		ht.AddAny(in)
 		return fmt.Errorf("finish")
 	})
 	return b
 }
 
 func (b *formElement) SetButtonText(text string) *formElement {
-	b.Traverse(func(parent string, ht *HtmlToken) error {
-		if ht.Info.Data != "button" {
+	b.Traverse(nil, func(parent, ht IElement) error {
+		if ht.HtmlToken().Data != "button" {
 			return nil
 		}
 		if ht.GetAttr("type") != "submit" {
 			return nil
 		}
-		ht.children = nil
-		ht.text = text
+		ht.SetChild()
+		ht.SetText(text)
 		return fmt.Errorf("finish")
 	})
 	return b

@@ -1,6 +1,6 @@
 package e
 
-func Loading() *HtmlToken {
+func Loading() IElement {
 	item, _ := ParseHtml(`<div class="spinner-border text-info" role="status">
 	<span class="visually-hidden">Loading...</span>
   </div>`)

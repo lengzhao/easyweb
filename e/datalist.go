@@ -20,7 +20,7 @@ func (e *datalistElement) Add(text ...string) *datalistElement {
 	for _, it := range text {
 		lop := op.Copy()
 		lop.SetAttr("value", it)
-		e.children[2].add(lop)
+		e.children[2].Add(lop)
 	}
 	return e
 }

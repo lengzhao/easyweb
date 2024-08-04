@@ -197,7 +197,7 @@ func (p *easyPage) processMsg() {
 								fmt.Println("Recovered", r)
 							}
 						}()
-						cb.Event.MessageCallbackFromFramwork(msg.ID, dataType, data)
+						cb.Event.MessageCallbackFromFramwork(p, msg.ID, dataType, data)
 					}(msg.ID, CbDataTypeString, []byte(msg.Msg))
 				}
 			case fileMsgData:
@@ -209,7 +209,7 @@ func (p *easyPage) processMsg() {
 								fmt.Println("Recovered", r)
 							}
 						}()
-						cb.Event.MessageCallbackFromFramwork(msg.ID, dataType, data)
+						cb.Event.MessageCallbackFromFramwork(p, msg.ID, dataType, data)
 					}(msg.ID, CbDataTypeBinary, msg.BinaryData)
 				}
 			case eventMsgData:

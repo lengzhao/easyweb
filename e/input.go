@@ -39,9 +39,9 @@ func InputGroup(name, text string) *inputElement {
 	<span class="input-group-text"></span>
   </div>`)
 	if text == "" {
-		out.children[0].disable = true
+		out.children[0].SetAttr("hidden", "true")
 	}
-	out.children[2].disable = true
+	out.children[2].SetAttr("hidden", "true")
 	if name != "" {
 		out.children[1].SetAttr("name", name)
 	}
@@ -51,8 +51,8 @@ func InputGroup(name, text string) *inputElement {
 }
 
 func (e *inputElement) Suffix(text string) *inputElement {
-	e.children[2].text = text
-	e.children[2].disable = false
+	e.children[2].SetText(text)
+	e.children[2].SetAttr("hidden", "")
 	return e
 }
 

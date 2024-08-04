@@ -10,26 +10,51 @@ import (
 	"golang.org/x/net/html"
 )
 
-type ICallback func(id string, dataType easyweb.CbDataType, data []byte)
+type ITraverseCb func(parent, token IElement) error
+
+type IElement interface {
+	String() string
+	GetID() string
+	GetAttr(k string) string
+	//set Attribute, if v=="",will remove it
+	SetAttr(k, v string) IElement
+	SetCb(typ string, cb ICallback) IElement
+	AfterElementLoadedFromFramwork(p easyweb.Page)
+	MessageCallbackFromFramwork(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) bool
+	Traverse(parent IElement, cb ITraverseCb) error
+	Add(in ...IElement) IElement
+	AddAny(in ...any) IElement
+	SetChild(child ...IElement) IElement
+	SetContainerID(cid string) IElement
+	ContainerID() string
+	GetChilds() []IElement
+	Copy() IElement
+	GetText() string
+	SetText(text string) IElement
+	Refresh(p easyweb.Page) error
+	HtmlToken() html.Token
+	SetHtmlToken(token html.Token)
+}
+
+type ICallback func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte)
 
 type HtmlToken struct {
 	Info        html.Token
-	children    []*HtmlToken
-	parent      string
+	children    []IElement
 	text        string
 	eventKey    string
 	eventType   string
 	containerID string
 	cb          ICallback
-	disable     bool
 }
 
-func ParseHtml(text string) (*HtmlToken, error) {
+func ParseHtml(text string) (IElement, error) {
 	var out HtmlToken
 	err := out.parseText(text)
 	if err != nil {
 		return nil, err
 	}
+
 	return &out, nil
 }
 
@@ -42,8 +67,10 @@ func (n *HtmlToken) parseText(text string) error {
 	if len(n.children) == 0 {
 		log.Println("fail to parse:", err)
 		n.children = nil
-	} else if n.Info.Data == "" && n.text == "" {
-		*n = *n.children[0]
+	}
+	if n.Info.Data == "" && n.text == "" && len(n.children) == 1 {
+		child := n.children[0].(*HtmlToken)
+		*n = *child
 	}
 	return nil
 }
@@ -85,10 +112,16 @@ func (n *HtmlToken) parse(tkn *html.Tokenizer) error {
 		}
 	}
 }
-func (n *HtmlToken) String() string {
-	if n.disable {
-		return ""
-	}
+
+func (n HtmlToken) HtmlToken() html.Token {
+	return n.Info
+}
+
+func (n *HtmlToken) SetHtmlToken(token html.Token) {
+	n.Info = token
+}
+
+func (n HtmlToken) String() string {
 	if n.Info.Data == "" {
 		return n.text
 	}
@@ -106,6 +139,9 @@ func (n *HtmlToken) String() string {
 	}
 	out += ">"
 	for _, child := range n.children {
+		if child == nil {
+			continue
+		}
 		out += child.String()
 	}
 	out += n.text
@@ -113,12 +149,12 @@ func (n *HtmlToken) String() string {
 	return out
 }
 
-func (n *HtmlToken) GetID() string {
+func (n HtmlToken) GetID() string {
 	return n.GetAttr("id")
 }
 
 // get Attribute
-func (n *HtmlToken) GetAttr(k string) string {
+func (n HtmlToken) GetAttr(k string) string {
 	for _, it := range n.Info.Attr {
 		if it.Key == k {
 			if it.Val == "" && booleanAttributes[k] {
@@ -131,7 +167,7 @@ func (n *HtmlToken) GetAttr(k string) string {
 }
 
 // set Attribute, if v=="",will remove it
-func (n *HtmlToken) SetAttr(k, v string) *HtmlToken {
+func (n *HtmlToken) SetAttr(k, v string) IElement {
 	attr := []html.Attribute{}
 	if v != "" {
 		attr = append(attr, html.Attribute{Key: k, Val: v})
@@ -146,15 +182,19 @@ func (n *HtmlToken) SetAttr(k, v string) *HtmlToken {
 }
 
 // add children or text
-func (n *HtmlToken) add(in ...any) *HtmlToken {
+func (n *HtmlToken) Add(in ...IElement) IElement {
+	n.children = append(n.children, in...)
+	return n
+}
+
+// add children or text
+func (n *HtmlToken) AddAny(in ...any) IElement {
 	for _, it := range in {
 		switch val := it.(type) {
-		case []iBase:
-			for _, it := range val {
-				n.children = append(n.children, it.Base())
-			}
-		case iBase:
-			n.children = append(n.children, val.Base())
+		case []IElement:
+			n.children = append(n.children, val...)
+		case IElement:
+			n.children = append(n.children, val)
 		default:
 			item := HtmlToken{}
 			item.text = fmt.Sprint(it)
@@ -164,13 +204,7 @@ func (n *HtmlToken) add(in ...any) *HtmlToken {
 	return n
 }
 
-type iBase interface {
-	Base() *HtmlToken
-}
-
-var _ iBase = &HtmlToken{}
-
-func (n *HtmlToken) SetCb(typ string, cb ICallback) *HtmlToken {
+func (n *HtmlToken) SetCb(typ string, cb ICallback) IElement {
 	if typ == "" {
 		typ = getEventType2(n.Info.Data)
 	}
@@ -184,11 +218,6 @@ func (n *HtmlToken) SetCb(typ string, cb ICallback) *HtmlToken {
 	return n
 }
 
-// Base returns the HtmlToken itself. easy 'Set' its subclasses, or will lost callback event
-func (n *HtmlToken) Base() *HtmlToken {
-	return n
-}
-
 func (n *HtmlToken) AfterElementLoadedFromFramwork(p easyweb.Page) {
 	// fmt.Println("try regist event:", n.GetAttr("id"), n.Info.Data, n.cb)
 	if n.cb != nil {
@@ -198,6 +227,9 @@ func (n *HtmlToken) AfterElementLoadedFromFramwork(p easyweb.Page) {
 		p.RegistEvent(n.eventKey, n.eventType, n)
 	}
 	for _, child := range n.children {
+		if child == nil {
+			continue
+		}
 		child.AfterElementLoadedFromFramwork(p)
 	}
 }
@@ -217,36 +249,39 @@ func getEventType2(in string) string {
 	}
 }
 
-func (n *HtmlToken) MessageCallbackFromFramwork(id string, dataType easyweb.CbDataType, data []byte) bool {
+func (n HtmlToken) MessageCallbackFromFramwork(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) bool {
 	if id == n.eventKey {
 		if n.cb != nil {
-			n.cb(id, dataType, data)
+			n.cb(p, id, dataType, data)
 		}
 		return true
 	}
 	for _, child := range n.children {
-		if child.MessageCallbackFromFramwork(id, dataType, data) {
+		if child == nil {
+			continue
+		}
+		if child.MessageCallbackFromFramwork(p, id, dataType, data) {
 			return true
 		}
 	}
 	return false
 }
 
-type ITraverseCb func(parent string, token *HtmlToken) error
-
-func (n *HtmlToken) Traverse(cb ITraverseCb) error {
+func (n *HtmlToken) Traverse(parent IElement, cb ITraverseCb) error {
 	num := len(n.children)
-	err := cb(n.parent, n)
+	err := cb(parent, n)
 	if err != nil {
 		return err
 	}
 	for i, child := range n.children {
-		child.parent = n.Info.Data
+		if child == nil {
+			continue
+		}
 		if i >= num {
 			// new children
 			break
 		}
-		err = child.Traverse(cb)
+		err = child.Traverse(n, cb)
 		if err != nil {
 			return err
 		}
@@ -254,11 +289,7 @@ func (n *HtmlToken) Traverse(cb ITraverseCb) error {
 	return nil
 }
 
-func (n *HtmlToken) AddChild(child *HtmlToken) *HtmlToken {
-	n.children = append(n.children, child)
-	return n
-}
-func (n *HtmlToken) SetChild(child ...*HtmlToken) *HtmlToken {
+func (n *HtmlToken) SetChild(child ...IElement) IElement {
 	n.children = nil
 	if len(child) > 0 {
 		n.children = append(n.children, child...)
@@ -267,21 +298,21 @@ func (n *HtmlToken) SetChild(child ...*HtmlToken) *HtmlToken {
 }
 
 // If the same container id is set, the content will be updated when written multiple times.
-func (n *HtmlToken) SetContainerID(cid string) *HtmlToken {
+func (n *HtmlToken) SetContainerID(cid string) IElement {
 	n.containerID = cid
 	return n
 }
 
-func (n *HtmlToken) ContainerID() string {
+func (n HtmlToken) ContainerID() string {
 	return n.containerID
 }
 
-func (n *HtmlToken) GetChilds() []*HtmlToken {
+func (n HtmlToken) GetChilds() []IElement {
 	return n.children
 }
 
 // Copy copy all element and clear the id
-func (n *HtmlToken) Copy() *HtmlToken {
+func (n *HtmlToken) Copy() IElement {
 	if n == nil {
 		return nil
 	}
@@ -295,8 +326,13 @@ func (n *HtmlToken) Copy() *HtmlToken {
 	return &out
 }
 
-func (n *HtmlToken) GetText() string {
+func (n HtmlToken) GetText() string {
 	return n.text
+}
+
+func (n *HtmlToken) SetText(text string) IElement {
+	n.text = text
+	return n
 }
 
 var booleanAttributes map[string]bool = map[string]bool{
@@ -324,6 +360,7 @@ var booleanAttributes map[string]bool = map[string]bool{
 	"required":        true,
 	"reversed":        true,
 	"selected":        true,
+	"hidden":          true,
 }
 
 var selfClosingTagToken map[string]bool = map[string]bool{
@@ -351,7 +388,7 @@ func getID() string {
 	return fmt.Sprintf("eid%04d", val)
 }
 
-func (n *HtmlToken) Refresh(p easyweb.Page) error {
+func (n HtmlToken) Refresh(p easyweb.Page) error {
 	// fmt.Println("try regist event:", n.GetAttr("id"), n.Info.Data, n.cb)
 	id := n.GetID()
 	if id == "" {

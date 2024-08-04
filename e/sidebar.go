@@ -25,12 +25,12 @@ func Sidebar(title string) *elementSidebar {
 	return &out
 }
 
-func (e *elementSidebar) GetButton() *HtmlToken {
+func (e *elementSidebar) GetButton() IElement {
 	item, _ := ParseHtml(`<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#` + e.id + `" aria-controls="` + e.id + `">Enable body scrolling</button>`)
 	return item
 }
 
-func (e *elementSidebar) Add(in any) *elementSidebar {
-	e.children[1].add(in)
+func (e *elementSidebar) AddItem(in any) *elementSidebar {
+	e.children[1].AddAny(in)
 	return e
 }

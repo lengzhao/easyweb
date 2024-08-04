@@ -35,24 +35,24 @@ func Tabs() *tabsElement {
 	return &out
 }
 
-func (b *tabsElement) Add(title string, body any) *tabsElement {
+func (b *tabsElement) AddItem(title string, body any) *tabsElement {
 	hid := getID()
 	id := getID()
 	hd, _ := ParseHtml(`<button class="nav-link" id="` + hid + `" data-bs-toggle="tab" data-bs-target="#` + id + `" type="button" role="tab" aria-controls="` + id + `" aria-selected="true">` + title + `</button>`)
 	bd, _ := ParseHtml(`<div class="tab-pane fade" id="` + id + `" role="tabpanel" aria-labelledby="` + hid + `"></div>`)
-	bd.add(body)
-	b.Traverse(func(parent string, ht *HtmlToken) error {
+	bd.AddAny(body)
+	b.Traverse(nil, func(parent, ht IElement) error {
 		if ht.GetAttr("role") == "tablist" {
-			if len(ht.children) == 0 {
+			if len(ht.GetChilds()) == 0 {
 				hd.SetAttr("class", "nav-link active")
 			}
-			ht.add(hd)
+			ht.Add(hd)
 		}
 		if ht.GetAttr("class") == "tab-content" {
-			if len(ht.children) == 0 {
+			if len(ht.GetChilds()) == 0 {
 				bd.SetAttr("class", "tab-pane fade show active")
 			}
-			ht.add(bd)
+			ht.Add(bd)
 			return fmt.Errorf("finish")
 		}
 		return nil

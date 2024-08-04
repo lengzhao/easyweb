@@ -34,29 +34,29 @@ func Modal(btnText, title string) *modalElement {
 }
 
 func (e *modalElement) SetBody(body any) *modalElement {
-	e.Traverse(func(parent string, token *HtmlToken) error {
-		if token.Info.Data != "div" {
+	e.Traverse(nil, func(parent, ht IElement) error {
+		if ht.HtmlToken().Data != "div" {
 			return nil
 		}
-		if token.GetAttr("class") != "modal-body" {
+		if ht.GetAttr("class") != "modal-body" {
 			return nil
 		}
-		token.children = nil
-		token.add(body)
+		ht.SetChild()
+		ht.AddAny(body)
 		return fmt.Errorf("finish")
 	})
 	return e
 }
 
 func (e *modalElement) AddFooter(footer any) *modalElement {
-	e.Traverse(func(parent string, token *HtmlToken) error {
-		if token.Info.Data != "div" {
+	e.Traverse(nil, func(parent, ht IElement) error {
+		if ht.HtmlToken().Data != "div" {
 			return nil
 		}
-		if token.GetAttr("class") != "modal-footer" {
+		if ht.GetAttr("class") != "modal-footer" {
 			return nil
 		}
-		token.add(footer)
+		ht.AddAny(footer)
 		return fmt.Errorf("finish")
 	})
 	return e
