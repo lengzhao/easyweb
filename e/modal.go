@@ -35,7 +35,7 @@ func Modal(btnText, title string) *modalElement {
 
 func (e *modalElement) SetBody(body any) *modalElement {
 	e.Traverse(nil, func(parent, ht IElement) error {
-		if ht.HtmlToken().Data != "div" {
+		if ht.HtmlTag() != "div" {
 			return nil
 		}
 		if ht.GetAttr("class") != "modal-body" {
@@ -50,7 +50,7 @@ func (e *modalElement) SetBody(body any) *modalElement {
 
 func (e *modalElement) AddFooter(footer any) *modalElement {
 	e.Traverse(nil, func(parent, ht IElement) error {
-		if ht.HtmlToken().Data != "div" {
+		if ht.HtmlTag() != "div" {
 			return nil
 		}
 		if ht.GetAttr("class") != "modal-footer" {

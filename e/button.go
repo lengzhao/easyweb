@@ -15,5 +15,5 @@ func Button(text string, cb func(p easyweb.Page, id string)) IElement {
 			cb(p, id)
 		})
 	}
-	return &out.HtmlToken
+	return &out
 }

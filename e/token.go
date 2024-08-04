@@ -32,8 +32,7 @@ type IElement interface {
 	GetText() string
 	SetText(text string) IElement
 	Refresh(p easyweb.Page) error
-	HtmlToken() html.Token
-	SetHtmlToken(token html.Token)
+	HtmlTag() string
 }
 
 type ICallback func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte)
@@ -47,6 +46,8 @@ type HtmlToken struct {
 	containerID string
 	cb          ICallback
 }
+
+var _ IElement = &HtmlToken{}
 
 func ParseHtml(text string) (IElement, error) {
 	var out HtmlToken
@@ -113,12 +114,8 @@ func (n *HtmlToken) parse(tkn *html.Tokenizer) error {
 	}
 }
 
-func (n HtmlToken) HtmlToken() html.Token {
-	return n.Info
-}
-
-func (n *HtmlToken) SetHtmlToken(token html.Token) {
-	n.Info = token
+func (n HtmlToken) HtmlTag() string {
+	return n.Info.Data
 }
 
 func (n HtmlToken) String() string {

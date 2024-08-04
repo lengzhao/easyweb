@@ -71,7 +71,7 @@ func (b *formElement) SetFileCb(cb func(p easyweb.Page, id string, data []byte))
 func (b *formElement) AddInput(name, text string) *formElement {
 	item := InputGroup(name, text)
 	b.Traverse(nil, func(parent, ht IElement) error {
-		if parent == nil || ht.HtmlToken().Data != "div" || parent.HtmlToken().Data != "form" {
+		if parent == nil || ht.HtmlTag() != "div" || parent.HtmlTag() != "form" {
 			return nil
 		}
 		ht.Add(&item.HtmlToken)
@@ -82,7 +82,7 @@ func (b *formElement) AddInput(name, text string) *formElement {
 
 func (b *formElement) AddItem(in any) *formElement {
 	b.Traverse(nil, func(parent, ht IElement) error {
-		if parent == nil || ht.HtmlToken().Data != "div" || parent.HtmlToken().Data != "form" {
+		if parent == nil || ht.HtmlTag() != "div" || parent.HtmlTag() != "form" {
 			return nil
 		}
 		ht.AddAny(in)
@@ -93,7 +93,7 @@ func (b *formElement) AddItem(in any) *formElement {
 
 func (b *formElement) SetButtonText(text string) *formElement {
 	b.Traverse(nil, func(parent, ht IElement) error {
-		if ht.HtmlToken().Data != "button" {
+		if ht.HtmlTag() != "button" {
 			return nil
 		}
 		if ht.GetAttr("type") != "submit" {

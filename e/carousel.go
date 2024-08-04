@@ -54,12 +54,12 @@ func (b *carouselElement) Add(image, title, body string) *carouselElement {
 		bd.SetAttr("class", "carousel-item active")
 	}
 	bd.Traverse(nil, func(parent, ht IElement) error {
-		if ht.HtmlToken().Data == "h5" {
+		if ht.HtmlTag() == "h5" {
 			if title == "" {
 				ht.SetAttr("hidden", "true")
 			}
 		}
-		if ht.HtmlToken().Data == "p" {
+		if ht.HtmlTag() == "p" {
 			if body == "" {
 				ht.SetAttr("hidden", "true")
 			}

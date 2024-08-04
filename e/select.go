@@ -27,7 +27,7 @@ func (e *selectElement) AddItem(value, text string) *selectElement {
 func (e *selectElement) Select(value string) *selectElement {
 	// fmt.Println("set select:", value)
 	e.Traverse(nil, func(parent, ht IElement) error {
-		if parent == nil || ht.HtmlToken().Data != "option" || parent.HtmlToken().Data != "select" {
+		if parent == nil || ht.HtmlTag() != "option" || parent.HtmlTag() != "select" {
 			return nil
 		}
 		if ht.GetAttr("value") == value {

@@ -21,7 +21,7 @@ func Pagination(items []string, cb func(p easyweb.Page, id, item string)) *pagin
 	id := getID()
 	out.SetAttr("id", id)
 	out.Traverse(nil, func(parent, token IElement) error {
-		if token.HtmlToken().Data != "ul" {
+		if token.HtmlTag() != "ul" {
 			return nil
 		}
 		for _, item := range items {
@@ -45,7 +45,7 @@ func (e *paginationElement) eventCallback(p easyweb.Page, id string, dataType ea
 func (e *paginationElement) Active(item string) *paginationElement {
 	finish := false
 	e.Traverse(nil, func(parent, token IElement) error {
-		if token.HtmlToken().Data != "li" {
+		if token.HtmlTag() != "li" {
 			return nil
 		}
 		token.Traverse(nil, func(parent, lt IElement) error {

@@ -43,7 +43,7 @@ func Navbar(name string) *navbarElement {
 
 func (b *navbarElement) AddItem(item ...IElement) *navbarElement {
 	b.Traverse(nil, func(parent, ht IElement) error {
-		if parent == nil || ht.HtmlToken().Data != "ul" || parent.HtmlToken().Data != "div" {
+		if parent == nil || ht.HtmlTag() != "ul" || parent.HtmlTag() != "div" {
 			return nil
 		}
 		for _, it := range item {
@@ -71,7 +71,7 @@ func (b *navbarElement) Add(text, url string) *navbarElement {
 func (b *navbarElement) SetSearchCb(cb func(p easyweb.Page, value string)) *navbarElement {
 	id := getID()
 	b.Traverse(nil, func(parent, ht IElement) error {
-		if ht.HtmlToken().Data != "form" {
+		if ht.HtmlTag() != "form" {
 			return nil
 		}
 		ht.SetAttr("id", id)

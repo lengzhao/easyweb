@@ -44,7 +44,7 @@ func (e *radioElement) AddItem(value, text string) *radioElement {
 func (e *radioElement) Select(value string) *radioElement {
 	// fmt.Println("set check:", value)
 	e.Traverse(nil, func(parent, ht IElement) error {
-		if ht.HtmlToken().Data != "input" {
+		if ht.HtmlTag() != "input" {
 			return nil
 		}
 		if ht.GetAttr("value") == value {
@@ -61,7 +61,7 @@ func (e *radioElement) Select(value string) *radioElement {
 // Inline Make items appear inline. Must be called after adding items.
 func (e *radioElement) Inline() *radioElement {
 	e.Traverse(nil, func(parent, ht IElement) error {
-		if parent == nil || ht.HtmlToken().Data != "div" || parent.HtmlToken().Data != "div" {
+		if parent == nil || ht.HtmlTag() != "div" || parent.HtmlTag() != "div" {
 			return nil
 		}
 		cls := ht.GetAttr("class")

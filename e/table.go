@@ -21,7 +21,7 @@ func Table(head ...string) *tableElement {
 	</tbody>
   </table>`)
 	out.Traverse(nil, func(parent, ht IElement) error {
-		if ht.HtmlToken().Data != "tr" {
+		if ht.HtmlTag() != "tr" {
 			return nil
 		}
 		for _, v := range head {
@@ -59,7 +59,7 @@ func (e *tableElement) AddValue(in [][]any) *tableElement {
 // 	e.boldFirst = true
 
 // 	e.Traverse(nil, func(parent, ht IElement) error {
-// 		if parent == nil || ht.HtmlToken().Data != "tbody" || parent.HtmlToken().Data != "table" {
+// 		if parent == nil || ht.HtmlTag() != "tbody" || parent.HtmlTag() != "table" {
 // 			return nil
 // 		}
 // 		for _, it := range ht.GetChilds() {
@@ -76,7 +76,7 @@ func (e *tableElement) HiddenHead(hidden bool) *tableElement {
 	e.boldFirst = true
 
 	e.Traverse(nil, func(parent, ht IElement) error {
-		if parent == nil || ht.HtmlToken().Data != "thead" || parent.HtmlToken().Data != "table" {
+		if parent == nil || ht.HtmlTag() != "thead" || parent.HtmlTag() != "table" {
 			return nil
 		}
 		if hidden {
@@ -115,7 +115,7 @@ func Map2Table(keyWidth int, in map[string]any) *tableElement {
 	}
 	width := fmt.Sprintf("col-%d", keyWidth)
 	t.Traverse(nil, func(parent, ht IElement) error {
-		if ht.HtmlToken().Data != "tr" {
+		if ht.HtmlTag() != "tr" {
 			return nil
 		}
 		child := ht.GetChilds()

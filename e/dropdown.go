@@ -22,7 +22,7 @@ func Dropdown(text string) *dropdownElement {
 
 func (b *dropdownElement) Add(in ...any) *dropdownElement {
 	b.Traverse(nil, func(parent, ht IElement) error {
-		if ht.HtmlToken().Data != "ul" {
+		if ht.HtmlTag() != "ul" {
 			return nil
 		}
 		for _, v := range in {
@@ -37,7 +37,7 @@ func (b *dropdownElement) Add(in ...any) *dropdownElement {
 
 func (b *dropdownElement) AddLink(text, url string) *dropdownElement {
 	b.Traverse(nil, func(parent, ht IElement) error {
-		if ht.HtmlToken().Data != "ul" {
+		if ht.HtmlTag() != "ul" {
 			return nil
 		}
 		item, _ := ParseHtml(`<li><a class="dropdown-item" href="` + url + `">` + text + `</a></li>`)
@@ -48,7 +48,7 @@ func (b *dropdownElement) AddLink(text, url string) *dropdownElement {
 }
 func (b *dropdownElement) AddButton(text string, cb func(p easyweb.Page, id string)) *dropdownElement {
 	b.Traverse(nil, func(parent, ht IElement) error {
-		if ht.HtmlToken().Data != "ul" {
+		if ht.HtmlTag() != "ul" {
 			return nil
 		}
 		btn := Button(text, cb)
