@@ -6,6 +6,8 @@ type selectElement struct {
 	HtmlToken
 }
 
+var _ IElement = &selectElement{}
+
 func Select(name string) *selectElement {
 	var out selectElement
 	out.parseText(`<select class="form-select" aria-label="Default select"></select>`)

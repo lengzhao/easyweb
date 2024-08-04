@@ -4,17 +4,19 @@ type rowElement struct {
 	HtmlToken
 }
 
-func Row(items ...any) *rowElement {
+var _ IElement = &rowElement{}
+
+func Row(items ...IElement) *rowElement {
 	out := rowElement{}
 	out.parseText(`<div class="row"></div>`)
 	out.SetAttr("id", getID())
-	out.AddAny(items...)
+	out.Add(items...)
 	return &out
 }
 
-func (e *rowElement) AddCols(items ...any) *rowElement {
+func (e *rowElement) AddCols(items ...IElement) *rowElement {
 	for _, it := range items {
-		e.Add(&Col(0, it).HtmlToken)
+		e.Add(Col(0, it))
 	}
 	return e
 }

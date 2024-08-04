@@ -6,6 +6,8 @@ type modalElement struct {
 	HtmlToken
 }
 
+var _ IElement = &modalElement{}
+
 func Modal(btnText, title string) *modalElement {
 	out := modalElement{}
 	id := getID()
@@ -33,7 +35,7 @@ func Modal(btnText, title string) *modalElement {
 	return &out
 }
 
-func (e *modalElement) SetBody(body any) *modalElement {
+func (e *modalElement) SetBody(body IElement) *modalElement {
 	e.Traverse(nil, func(parent, ht IElement) error {
 		if ht.HtmlTag() != "div" {
 			return nil
@@ -42,13 +44,13 @@ func (e *modalElement) SetBody(body any) *modalElement {
 			return nil
 		}
 		ht.SetChild()
-		ht.AddAny(body)
+		ht.Add(body)
 		return fmt.Errorf("finish")
 	})
 	return e
 }
 
-func (e *modalElement) AddFooter(footer any) *modalElement {
+func (e *modalElement) AddFooter(footer IElement) *modalElement {
 	e.Traverse(nil, func(parent, ht IElement) error {
 		if ht.HtmlTag() != "div" {
 			return nil
@@ -56,7 +58,7 @@ func (e *modalElement) AddFooter(footer any) *modalElement {
 		if ht.GetAttr("class") != "modal-footer" {
 			return nil
 		}
-		ht.AddAny(footer)
+		ht.Add(footer)
 		return fmt.Errorf("finish")
 	})
 	return e

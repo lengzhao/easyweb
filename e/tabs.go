@@ -23,6 +23,8 @@ type tabsElement struct {
 	HtmlToken
 }
 
+var _ IElement = &tabsElement{}
+
 func Tabs() *tabsElement {
 	var out tabsElement
 	out.parseText(`<div><nav>
@@ -35,12 +37,12 @@ func Tabs() *tabsElement {
 	return &out
 }
 
-func (b *tabsElement) AddItem(title string, body any) *tabsElement {
+func (b *tabsElement) AddItem(title string, body IElement) *tabsElement {
 	hid := getID()
 	id := getID()
 	hd, _ := ParseHtml(`<button class="nav-link" id="` + hid + `" data-bs-toggle="tab" data-bs-target="#` + id + `" type="button" role="tab" aria-controls="` + id + `" aria-selected="true">` + title + `</button>`)
 	bd, _ := ParseHtml(`<div class="tab-pane fade" id="` + id + `" role="tabpanel" aria-labelledby="` + hid + `"></div>`)
-	bd.AddAny(body)
+	bd.Add(body)
 	b.Traverse(nil, func(parent, ht IElement) error {
 		if ht.GetAttr("role") == "tablist" {
 			if len(ht.GetChilds()) == 0 {

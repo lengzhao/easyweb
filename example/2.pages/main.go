@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -17,7 +18,7 @@ func main() {
 		page.Write("<a href=\"page2.html\">Second Page</a>")
 		for i := 0; i < 20; i++ {
 			time.Sleep(100 * time.Millisecond)
-			page.Write(e.Label("----").Add(i))
+			page.Write(e.Label("----").SetText(fmt.Sprint(i)))
 		}
 		page.Write("fdsfdsfdsfdsfdsfsdfdsfdsfd")
 	}, easyweb.DefaultPagePath...)

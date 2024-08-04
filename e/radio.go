@@ -11,6 +11,8 @@ type radioElement struct {
 	name string
 }
 
+var _ IElement = &radioElement{}
+
 func Radio(name string) *radioElement {
 	var out radioElement
 	out.parseText("<div></div>")

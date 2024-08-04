@@ -14,6 +14,8 @@ type formElement struct {
 	fileCb func(p easyweb.Page, id string, data []byte)
 }
 
+var _ IElement = &formElement{}
+
 func Form(cb func(p easyweb.Page, id string, info map[string]string)) *formElement {
 	var out formElement
 	out.parseText(`<form>
@@ -80,12 +82,12 @@ func (b *formElement) AddInput(name, text string) *formElement {
 	return b
 }
 
-func (b *formElement) AddItem(in any) *formElement {
+func (b *formElement) AddItem(in IElement) *formElement {
 	b.Traverse(nil, func(parent, ht IElement) error {
 		if parent == nil || ht.HtmlTag() != "div" || parent.HtmlTag() != "form" {
 			return nil
 		}
-		ht.AddAny(in)
+		ht.Add(in)
 		return fmt.Errorf("finish")
 	})
 	return b

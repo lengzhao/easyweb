@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -20,9 +21,10 @@ func main() {
 		var statID string
 		form := e.Form(func(p easyweb.Page, id string, info map[string]string) {
 			fmt.Println("form data:", info)
-			page.Write(e.Label("receive form data:").Add(info))
+			str, _ := json.MarshalIndent(info, "", "  ")
+			page.Write(e.Label("receive form data:").SetText(string(str)))
 		})
-		form.AddAny(fileInput)
+		form.Add(fileInput)
 		form.SetFileCb(func(p easyweb.Page, id string, data []byte) {
 			fmt.Println("FileCb", id, len(data))
 			page.WriteWithID(statID, e.Label(fmt.Sprintf("receive file. id: %s. size:%d", id, len(data))))

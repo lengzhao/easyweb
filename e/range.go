@@ -8,6 +8,8 @@ type rangeElement struct {
 	HtmlToken
 }
 
+var _ IElement = &rangeElement{}
+
 func RangeInput(name, text string) *rangeElement {
 	var out rangeElement
 	id := getID()

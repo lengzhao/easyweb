@@ -12,6 +12,8 @@ type paginationElement struct {
 	pgCb func(p easyweb.Page, id, item string)
 }
 
+var _ IElement = &paginationElement{}
+
 func Pagination(items []string, cb func(p easyweb.Page, id, item string)) *paginationElement {
 	out := paginationElement{}
 	out.parseText(`<nav aria-label="Page navigation example">

@@ -4,6 +4,8 @@ type accordionElement struct {
 	HtmlToken
 }
 
+var _ IElement = &accordionElement{}
+
 func Accordion() *accordionElement {
 	var out accordionElement
 	out.parseText(`<div class="accordion"></div>`)

@@ -4,6 +4,8 @@ type videoElement struct {
 	HtmlToken
 }
 
+var _ IElement = &videoElement{}
+
 // Video generates a video HTML element from the given URL. defults to Aspect16by9
 func Video(url string) *videoElement {
 	var out videoElement

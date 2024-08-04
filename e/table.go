@@ -10,6 +10,8 @@ type tableElement struct {
 	boldFirst bool
 }
 
+var _ IElement = &tableElement{}
+
 func Table(head ...string) *tableElement {
 	var out tableElement
 	out.parseText(`<table class="table table-bordered table-striped">
@@ -25,7 +27,7 @@ func Table(head ...string) *tableElement {
 			return nil
 		}
 		for _, v := range head {
-			ht.AddAny(`<th scope="col">` + v + `</th>`)
+			ht.Add(MustParseHtml(`<th scope="col">` + v + `</th>`))
 		}
 		return nil
 	})
@@ -40,7 +42,15 @@ func (e *tableElement) AddLine(in []any) *tableElement {
 		if e.boldFirst && i == 0 {
 			td, _ = ParseHtml(`<th scope="row"></th>`)
 		}
-		td.AddAny(v)
+		switch it := v.(type) {
+		case IElement:
+			td.Add(it)
+		case string:
+			td.SetText(it)
+		default:
+			str := fmt.Sprint(v)
+			td.SetText(str)
+		}
 		tr.Add(td)
 	}
 	e.children[1].Add(tr)
@@ -107,7 +117,7 @@ func Map2Table(keyWidth int, in map[string]any) *tableElement {
 		case map[string]any:
 			t.AddLine([]any{k, Map2Table(keyWidth, val).HiddenHead(true)})
 		default:
-			t.AddLine([]any{k, in[k]})
+			t.AddLine([]any{k, val})
 		}
 	}
 	if keyWidth <= 0 || keyWidth >= 12 {

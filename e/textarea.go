@@ -10,6 +10,8 @@ type textareaElement struct {
 	HtmlToken
 }
 
+var _ IElement = &textareaElement{}
+
 func Textarea(name, title string) *textareaElement {
 	var out textareaElement
 	out.parseText(`<div class="input-group">

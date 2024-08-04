@@ -4,6 +4,8 @@ type checkElement struct {
 	HtmlToken
 }
 
+var _ IElement = &checkElement{}
+
 func Check(name, text string) *checkElement {
 	var out checkElement
 	id := getID()

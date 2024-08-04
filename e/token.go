@@ -23,7 +23,6 @@ type IElement interface {
 	MessageCallbackFromFramwork(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) bool
 	Traverse(parent IElement, cb ITraverseCb) error
 	Add(in ...IElement) IElement
-	AddAny(in ...any) IElement
 	SetChild(child ...IElement) IElement
 	SetContainerID(cid string) IElement
 	ContainerID() string
@@ -57,6 +56,16 @@ func ParseHtml(text string) (IElement, error) {
 	}
 
 	return &out, nil
+}
+
+func MustParseHtml(text string) IElement {
+	out, err := ParseHtml(text)
+	if err != nil {
+		item := HtmlToken{}
+		item.text = fmt.Sprint(text)
+		return &item
+	}
+	return out
 }
 
 func (n *HtmlToken) parseText(text string) error {
@@ -185,7 +194,7 @@ func (n *HtmlToken) Add(in ...IElement) IElement {
 }
 
 // add children or text
-func (n *HtmlToken) AddAny(in ...any) IElement {
+func (n *HtmlToken) AddAny1(in ...any) IElement {
 	for _, it := range in {
 		switch val := it.(type) {
 		case []IElement:

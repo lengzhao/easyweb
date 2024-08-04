@@ -1,5 +1,7 @@
 package e
 
+import "fmt"
+
 type listElement struct {
 	HtmlToken
 }
@@ -24,8 +26,16 @@ func (e *listElement) Horizontal() *listElement {
 
 func (b *listElement) AddItems(in ...any) *listElement {
 	for _, v := range in {
-		item, _ := ParseHtml(`<li class="list-group-item"></li>`)
-		item.AddAny(v)
+		item := MustParseHtml(`<li class="list-group-item"></li>`)
+		switch it := v.(type) {
+		case IElement:
+			item.Add(it)
+		case string:
+			item = MustParseHtml(`<li class="list-group-item">` + it + `</li>`)
+		default:
+			str := fmt.Sprint(it)
+			item = MustParseHtml(`<li class="list-group-item">` + str + `</li>`)
+		}
 		b.Add(item)
 	}
 	return b

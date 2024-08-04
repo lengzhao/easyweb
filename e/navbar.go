@@ -11,6 +11,8 @@ type navbarElement struct {
 	HtmlToken
 }
 
+var _ IElement = &navbarElement{}
+
 // Navbar creates a new navbarElement with the given name.
 //
 // Parameters:
@@ -41,30 +43,28 @@ func Navbar(name string) *navbarElement {
 	return &out
 }
 
-func (b *navbarElement) AddItem(item ...IElement) *navbarElement {
+func (b *navbarElement) AddItem(text, url string) *navbarElement {
+	it := Link(text, url)
+	return b.AddCustomItem(it)
+}
+
+func (b *navbarElement) AddCustomItem(it IElement) *navbarElement {
 	b.Traverse(nil, func(parent, ht IElement) error {
 		if parent == nil || ht.HtmlTag() != "ul" || parent.HtmlTag() != "div" {
 			return nil
 		}
-		for _, it := range item {
-			lit, _ := ParseHtml(`<li class="nav-item"></li>`)
-			if len(ht.GetChilds()) == 0 {
-				it.SetAttr("class", it.GetAttr("class")+" nav-link active")
-			} else {
-				it.SetAttr("class", it.GetAttr("class")+" nav-link")
-			}
-			lit.Add(it)
-			ht.Add(lit)
+		lit, _ := ParseHtml(`<li class="nav-item"></li>`)
+		if len(ht.GetChilds()) == 0 {
+			it.SetAttr("class", it.GetAttr("class")+" nav-link active")
+		} else {
+			it.SetAttr("class", it.GetAttr("class")+" nav-link")
 		}
+		lit.Add(it)
+		ht.Add(lit)
+
 		return fmt.Errorf("finish")
 	})
 
-	return b
-}
-
-func (b *navbarElement) Add(text, url string) *navbarElement {
-	it := Link(text, url)
-	b.AddItem(&it.HtmlToken)
 	return b
 }
 

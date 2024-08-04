@@ -6,6 +6,8 @@ type dropdownElement struct {
 	HtmlToken
 }
 
+var _ IElement = &dropdownElement{}
+
 func Dropdown(text string) *dropdownElement {
 	var out dropdownElement
 	id := getID()
@@ -20,14 +22,14 @@ func Dropdown(text string) *dropdownElement {
 	return &out
 }
 
-func (b *dropdownElement) Add(in ...any) *dropdownElement {
+func (b *dropdownElement) AddItem(in ...IElement) *dropdownElement {
 	b.Traverse(nil, func(parent, ht IElement) error {
 		if ht.HtmlTag() != "ul" {
 			return nil
 		}
 		for _, v := range in {
 			item, _ := ParseHtml(`<li class="dropdown-item"></li>`)
-			item.AddAny(v)
+			item.Add(v)
 			ht.Add(item)
 		}
 		return nil

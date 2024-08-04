@@ -15,7 +15,7 @@ func Datalist(name, text string) *datalistElement {
 	return &out
 }
 
-func (e *datalistElement) Add(text ...string) *datalistElement {
+func (e *datalistElement) AddItem(text ...string) *datalistElement {
 	op, _ := ParseHtml(`<option value="">`)
 	for _, it := range text {
 		lop := op.Copy()

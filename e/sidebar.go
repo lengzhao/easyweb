@@ -9,6 +9,8 @@ type elementSidebar struct {
 	id string
 }
 
+var _ IElement = &elementSidebar{}
+
 func Sidebar(title string) *elementSidebar {
 	id := "offcanvas" + getID()
 	out := elementSidebar{}
@@ -21,7 +23,6 @@ func Sidebar(title string) *elementSidebar {
 	<div class="offcanvas-body">
 	</div>
   </div>`)
-	out.SetAttr("id", getID())
 	return &out
 }
 
@@ -30,7 +31,7 @@ func (e *elementSidebar) GetButton() IElement {
 	return item
 }
 
-func (e *elementSidebar) AddItem(in any) *elementSidebar {
-	e.children[1].AddAny(in)
+func (e *elementSidebar) AddItem(in IElement) *elementSidebar {
+	e.children[1].Add(in)
 	return e
 }

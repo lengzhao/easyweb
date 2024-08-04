@@ -1,14 +1,12 @@
 package e
 
-import (
-	"bytes"
-	"fmt"
-	"html/template"
-)
+import "fmt"
 
 type labelElement struct {
 	HtmlToken
 }
+
+var _ IElement = &labelElement{}
 
 func Label(text string) *labelElement {
 	out := labelElement{}
@@ -18,18 +16,32 @@ func Label(text string) *labelElement {
 	return &out
 }
 
-func (e *labelElement) Set(text any) *labelElement {
-	e.text = fmt.Sprint(text)
-	buff := new(bytes.Buffer)
-	template.HTMLEscape(buff, []byte(e.text))
-	e.text = buff.String()
+func (e *labelElement) AddText(text string) *labelElement {
+	e.text += text
 	return e
 }
 
-func (e *labelElement) Add(text any) *labelElement {
-	e.text += fmt.Sprint(text)
-	buff := new(bytes.Buffer)
-	template.HTMLEscape(buff, []byte(e.text))
-	e.text = buff.String()
-	return e
+// <div>text</div>
+func Div(text string) IElement {
+	var out HtmlToken
+	out.parseText(`<div>` + text + `</div>`)
+	return &out
+}
+
+// <p>text</p>
+func P(text string) IElement {
+	var out HtmlToken
+	out.parseText(`<p>` + text + `</p>`)
+	return &out
+}
+
+func Text(text string) IElement {
+	var out HtmlToken
+	out.SetText(text)
+	return &out
+}
+
+// h1-h6,level=1-6
+func H(level uint, msg string) IElement {
+	return MustParseHtml(fmt.Sprintf("<h%d>%s</h%d>", level, msg, level))
 }

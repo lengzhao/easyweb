@@ -9,6 +9,8 @@ type carouselElement struct {
 	id string
 }
 
+var _ IElement = &carouselElement{}
+
 func Carousel() *carouselElement {
 	var out carouselElement
 	out.id = getID()
@@ -29,7 +31,7 @@ func Carousel() *carouselElement {
 	return &out
 }
 
-func (b *carouselElement) Add(image, title, body string) *carouselElement {
+func (b *carouselElement) AddItem(image, title, body string) *carouselElement {
 	indicators := b.children[0]
 	ic := indicators.GetChilds()
 	hd, _ := ParseHtml(`<button type="button" data-bs-target="#" data-bs-slide-to="0" aria-label="Slide ` + fmt.Sprintf("%d", len(ic)+1) + `"></button>`)

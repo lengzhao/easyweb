@@ -8,6 +8,8 @@ type cardElement struct {
 	HtmlToken
 }
 
+var _ IElement = &cardElement{}
+
 func (c cardElement) Data() string {
 	return `<div class="card col-3">
 	<img src="..." class="card-img-top" alt="..."/>
