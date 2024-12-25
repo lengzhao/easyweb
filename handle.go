@@ -19,6 +19,7 @@ import (
 //go:embed templates/default.html
 var DefaultPageTmpl string
 
+var WssPrefix = "/"
 var DefaultPagePath []string = []string{
 	"", "/", "/index.html",
 }
@@ -64,6 +65,9 @@ func RegisterPageWithID(pid string, pn PageFunc, path ...string) string {
 	}
 	wssPath := "/wss/" + pid
 	http.HandleFunc(wssPath, page.HandleWs)
+	if WssPrefix != "" && wssPath != "/" {
+		http.HandleFunc(WssPrefix + wssPath, page.HandleWs)
+	}
 	return wssPath
 }
 
