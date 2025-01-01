@@ -70,12 +70,12 @@ func (e *inputElement) Value(value string) *inputElement {
 	return e
 }
 
-func (e *inputElement) ChangeSuffix(suffix *HtmlToken) *inputElement {
+func (e *inputElement) ChangeSuffix(suffix IElement) *inputElement {
 	e.children[2] = suffix
 	return e
 }
 
-func (e *inputElement) ChangeInput(in *HtmlToken) *inputElement {
+func (e *inputElement) ChangeInput(in IElement) *inputElement {
 	e.children[1] = in
 	return e
 }
@@ -86,6 +86,6 @@ func (e *inputElement) Unrequired() *inputElement {
 }
 
 func (e *inputElement) Hidden() *inputElement {
-	e.children[1].SetAttr("hidden", "true")
+	e.SetAttr("hidden", "true")
 	return e
 }

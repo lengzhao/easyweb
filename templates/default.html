@@ -24,7 +24,7 @@
         if (window.location.protocol == "https:") {
             wsUrl = "wss:"
         }
-        wsUrl = wsUrl + "//" + window.location.host + "/wss/{{.}}"
+        wsUrl = wsUrl + "//" + window.location.host + "/wss/{{.}}"+window.location.search
         var ws = new WebSocket(wsUrl);
 
         ws.onclose = function () {
@@ -80,6 +80,18 @@
                     }
             }
         };
+
+        // send heartbeat every 3 seconds
+        setInterval(function () {
+            if (ws.readyState == WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: "heartbeat" }));
+            } else {
+                ws = new WebSocket(wsUrl);
+                ws.onopen = function (event) {
+                    location.reload();
+                }
+            }
+        }, 3000);
 
         function bindEvent(typ, id) {
             console.log("bindEvent:", typ, id)

@@ -66,7 +66,7 @@ func RegisterPageWithID(pid string, pn PageFunc, path ...string) string {
 	wssPath := "/wss/" + pid
 	http.HandleFunc(wssPath, page.HandleWs)
 	if WssPrefix != "" && wssPath != "/" {
-		http.HandleFunc(WssPrefix + wssPath, page.HandleWs)
+		http.HandleFunc(WssPrefix+wssPath, page.HandleWs)
 	}
 	return wssPath
 }
@@ -119,6 +119,13 @@ func (p *pageWs) HandleWs(w http.ResponseWriter, r *http.Request) {
 		p.cb(page)
 	}()
 	go page.processMsg()
+
+	page.SetEnv(ENV_REMOTE_ADDR, r.RemoteAddr)
+	page.SetEnv(ENV_HEADER, r.Header)
+	page.SetEnv(ENV_QUERY, r.URL.Query())
+	page.SetEnv(ENV_PATH, r.URL.Path)
+	page.SetEnv(ENV_COOKIES, r.Cookies())
+
 	var lastID string
 	var lastFile string
 	var lastSize int64
@@ -164,6 +171,7 @@ func (p *pageWs) HandleWs(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
+	page.SetEnv(ENV_CLOSEING, true)
 	close(page.closed)
 	// fmt.Println("ws disconnect:", r.RemoteAddr)
 }

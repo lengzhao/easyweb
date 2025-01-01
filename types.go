@@ -80,3 +80,12 @@ const (
 type IAfterLoaded interface {
 	AfterElementLoadedFromFramwork(p Page)
 }
+
+const (
+	ENV_COOKIES     = "e_cookies"     // http.Request.Cookies()
+	ENV_PATH        = "e_path"        // http.Request.URL.Path
+	ENV_HEADER      = "e_header"      // http.Request.Header
+	ENV_QUERY       = "e_query"       // http.Request.URL.Query()
+	ENV_CLOSEING    = "e_closing"     // bool,true
+	ENV_REMOTE_ADDR = "e_remote_addr" // http.Request.RemoteAddr
+)

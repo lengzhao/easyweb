@@ -49,7 +49,7 @@ func main() {
 			p.Write("button click:" + fmt.Sprint(count))
 			p.Write(time.Now().String())
 		}))
-		row.Add(&e.Link("Link ...", "#").HtmlToken)
+		row.Add(e.Link("Link ...", "#"))
 		dropdown := e.Dropdown("Dropdown001").AddLink("Link2 ...", "#")
 		dropdown.AddButton("button3", func(p easyweb.Page, id string) {
 			p.Write("button3 click:" + id + time.Now().String())
@@ -57,11 +57,11 @@ func main() {
 		dropdown.AddButton("button4", func(p easyweb.Page, id string) {
 			p.Write("button4 click:" + id + time.Now().String())
 		})
-		row.Add(&dropdown.HtmlToken)
+		row.Add(dropdown)
 		pag := e.Pagination([]string{"<<", "1", "2", "3", "4", "5", ">>"}, func(p easyweb.Page, id, item string) {
 			fmt.Println("pagination:", id, item)
 		}).Active("2")
-		row.Add(&pag.HtmlToken)
+		row.Add(pag)
 		tabs.AddItem("Button", row)
 
 		box2 := e.Row()
@@ -102,7 +102,7 @@ func main() {
 		label.SetCb("click", func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
 			p.Write("label click:" + id + time.Now().String())
 		})
-		box3.Add(&label.HtmlToken).Add(e.MustParseHtml(`<br/>`))
+		box3.Add(label).Add(e.MustParseHtml(`<br/>`))
 		box3.Add(e.Button("RunJs From Server", func(p easyweb.Page, id string) {
 			p.RunJs(`console.log("hello world. 123456")`)
 			p.Write(`run js:console.log("hello world. 123456")` + time.Now().String())
