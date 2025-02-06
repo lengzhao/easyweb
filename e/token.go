@@ -400,29 +400,7 @@ func (n HtmlToken) Refresh(p easyweb.Page) error {
 	if id == "" {
 		return fmt.Errorf("Refresh requires setting id")
 	}
-	var attrs string
-	for _, it := range n.Info.Attr {
-		if it.Key == "id" {
-			continue
-		}
-		if booleanAttributes[it.Key] {
-			attrs += fmt.Sprintf(`document.getElementById("%s")."%s"=true;`, id, it.Key)
-		} else {
-			attrs += fmt.Sprintf(`document.getElementById("%s").setAttribute("%s","%s");`, id, it.Key, it.Val)
-		}
-	}
-	if len(attrs) > 0 {
-		p.RunJs(attrs)
-	}
 
-	var childInfo string
-	for _, it := range n.children {
-		childInfo += it.String()
-	}
-	childInfo += n.text
-	if len(childInfo) == 0 {
-		childInfo = " "
-	}
-	p.WriteWithID(id, childInfo)
+	p.WriteWithID(id, n)
 	return nil
 }

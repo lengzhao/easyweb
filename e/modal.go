@@ -50,6 +50,20 @@ func (e *modalElement) SetBody(body IElement) *modalElement {
 	return e
 }
 
+func (e *modalElement) AddBody(body IElement) *modalElement {
+	e.Traverse(nil, func(parent, ht IElement) error {
+		if ht.HtmlTag() != "div" {
+			return nil
+		}
+		if ht.GetAttr("class") != "modal-body" {
+			return nil
+		}
+		ht.Add(body)
+		return fmt.Errorf("finish")
+	})
+	return e
+}
+
 func (e *modalElement) AddFooter(footer IElement) *modalElement {
 	e.Traverse(nil, func(parent, ht IElement) error {
 		if ht.HtmlTag() != "div" {

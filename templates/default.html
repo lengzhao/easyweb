@@ -34,6 +34,19 @@
             // $("div:first").before(g);
         }
 
+        // 定时发送心跳包
+        setInterval(function () {
+            if (ws.readyState == WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: "heartbeat" }));
+            } else {
+                console.log("web socket is not open, try to reconnect");
+                ws = new WebSocket(wsUrl);
+                ws.onopen = function (event) {
+                    location.reload();
+                }
+            }
+        }, 3000);
+
         ws.onmessage = function (e) {
             var obj = JSON.parse(e.data);
             switch (obj.type) {
@@ -71,11 +84,13 @@
                             element.remove();
                             return
                         }
-                        element.innerHTML = obj.msg;
+                        // 整个element替换成obj.msg
+                        element.outerHTML = obj.msg;
+                        // element.innerHTML = obj.msg;
                     } else if (obj.msg.length > 0){
                         g = document.createElement('div');
                         g.setAttribute("id", obj.id);
-                        g.innerHTML = obj.msg;
+                        g.outerHTML = obj.msg;
                         document.getElementById("dynamic_container_id").appendChild(g);
                     }
             }
