@@ -16,6 +16,15 @@ func Select(name string) *selectElement {
 	return &out
 }
 
+func (e *selectElement) SetItems(items ...string) *selectElement {
+	e.children = nil
+	for _, item := range items {
+		e.AddItem(item, item)
+	}
+
+	return e
+}
+
 func (e *selectElement) AddItem(value, text string) *selectElement {
 	item, _ := ParseHtml(`<option value="` + value + `">` + text + `</option>`)
 	if len(e.children) == 0 {
