@@ -16,7 +16,7 @@
 </head>
 
 <body>
-    <div class="container" id="dynamic_container_id">
+    <div class="container" style="white-space: pre-line;" id="dynamic_container_id">
     </div>
 
     <script>
@@ -77,6 +77,12 @@
                     var element = document.getElementById(obj.id);
                     element.setAttribute(attr.key, attr.value);
                     break
+                case "replace":
+                    var element = document.getElementById(obj.id);
+                    if (element != null) {
+                        element.outerHTML = obj.msg;
+                    }
+                    break
                 default:
                     var element = document.getElementById(obj.id);
                     if (element != null) {
@@ -85,12 +91,11 @@
                             return
                         }
                         // 整个element替换成obj.msg
-                        element.outerHTML = obj.msg;
-                        // element.innerHTML = obj.msg;
+                        element.innerHTML = obj.msg;
                     } else if (obj.msg.length > 0){
                         g = document.createElement('div');
                         g.setAttribute("id", obj.id);
-                        g.outerHTML = obj.msg;
+                        g.innerHTML = obj.msg;
                         document.getElementById("dynamic_container_id").appendChild(g);
                     }
             }

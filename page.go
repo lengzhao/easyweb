@@ -69,7 +69,23 @@ func (p *easyPage) Write(e any) string {
 
 // e 将作为子元素放到id所属的元素内，如<div id=id>e</div>
 func (p *easyPage) WriteWithID(id string, e any) string {
+	if id == "" {
+		id = util.GetCallerID(util.LevelParent)
+	}
 	msg := toClientMsgData{id, "", fmt.Sprint(e)}
+	p.sendMsg(msg)
+	if evt, ok := e.(IAfterLoaded); ok {
+		evt.AfterElementLoadedFromFramwork(p)
+	}
+	return id
+}
+
+func (p *easyPage) Replace(e IGetID) string {
+	id := e.GetID()
+	if id == "" {
+		return ""
+	}
+	msg := toClientMsgData{id, "replace", fmt.Sprint(e)}
 	p.sendMsg(msg)
 	if evt, ok := e.(IAfterLoaded); ok {
 		evt.AfterElementLoadedFromFramwork(p)

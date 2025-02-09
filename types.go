@@ -13,6 +13,7 @@ type Page interface {
 	RunJs(js string) Page
 	Write(any) string
 	WriteWithID(string, any) string
+	Replace(IGetID) string
 	Delete(string)
 	SetAttr(id, key, value string) string
 	GetPeer() string
@@ -89,3 +90,7 @@ const (
 	ENV_CLOSEING    = "e_closing"     // bool,true
 	ENV_REMOTE_ADDR = "e_remote_addr" // http.Request.RemoteAddr
 )
+
+type IGetID interface {
+	GetID() string
+}

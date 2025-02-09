@@ -24,8 +24,6 @@ type IElement interface {
 	Traverse(parent IElement, cb ITraverseCb) error
 	Add(in ...IElement) IElement
 	SetChild(child ...IElement) IElement
-	SetContainerID(cid string) IElement
-	ContainerID() string
 	GetChilds() []IElement
 	Copy() IElement
 	GetText() string
@@ -303,16 +301,6 @@ func (n *HtmlToken) SetChild(child ...IElement) IElement {
 	return n
 }
 
-// If the same container id is set, the content will be updated when written multiple times.
-func (n *HtmlToken) SetContainerID(cid string) IElement {
-	n.containerID = cid
-	return n
-}
-
-func (n HtmlToken) ContainerID() string {
-	return n.containerID
-}
-
 func (n HtmlToken) GetChilds() []IElement {
 	return n.children
 }
@@ -401,6 +389,6 @@ func (n HtmlToken) Refresh(p easyweb.Page) error {
 		return fmt.Errorf("Refresh requires setting id")
 	}
 
-	p.WriteWithID(id, n)
+	p.Replace(n)
 	return nil
 }
