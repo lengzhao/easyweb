@@ -21,6 +21,12 @@ func main() {
 			page.Write(info)
 			page.Write(time.Now().String())
 		}).AddItem(radio).AddItem(selectItem).AddInput("name8", "Name8").AddItem(e.Textarea("textarea", "Textarea")))
+		page.Write(e.FormModal("Modal", "Submit", func(p easyweb.Page, id string, info map[string]string) {
+			fmt.Println("form data:", info)
+			page.Write("form data:")
+			page.Write(info)
+			page.Write(time.Now().String())
+		}).AddBody(e.InputGroup("name1", "Name1")).AddBody(e.InputGroup("name2", "Name2")))
 	}, easyweb.DefaultPagePath...)
 	http.ListenAndServe(":8182", nil)
 

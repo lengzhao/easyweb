@@ -44,6 +44,7 @@ func (b *formElement) eventCb(p easyweb.Page, id string, dataType easyweb.CbData
 	if b.cb == nil {
 		return
 	}
+	p.Replace(b)
 	info := make(map[string]string)
 	err := json.Unmarshal(data, &info)
 	if err != nil {
