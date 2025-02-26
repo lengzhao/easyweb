@@ -3,6 +3,7 @@ package e
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"strings"
 	"sync/atomic"
 
@@ -228,6 +229,7 @@ func (n *HtmlToken) AfterElementLoadedFromFramwork(p easyweb.Page) {
 		if n.eventKey == "" {
 			n.eventKey = n.GetID()
 		}
+		slog.Info("regist event:", "id", n.eventKey, "type", n.eventType)
 		p.RegistEvent(n.eventKey, n.eventType, n)
 	}
 	for _, child := range n.children {
@@ -382,7 +384,7 @@ func getID() string {
 	return fmt.Sprintf("eid%04d", val)
 }
 
-func (n HtmlToken) Refresh(p easyweb.Page) error {
+func (n *HtmlToken) Refresh(p easyweb.Page) error {
 	// fmt.Println("try regist event:", n.GetAttr("id"), n.Info.Data, n.cb)
 	id := n.GetID()
 	if id == "" {
