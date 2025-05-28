@@ -87,6 +87,7 @@ func main() {
 		selectItem := e.Select("select1").AddItem("s1", "s1").AddItem("s2", "s2").AddItem("s3", "s3").Select("s2")
 		datalist := e.Datalist("datalist", "Datalist")
 		datalist.AddValues("value1", "value2", "San Francisco", "New York")
+		datalist.AddItem("new_value1", "label of item")
 		form := e.Form(func(p easyweb.Page, id string, info map[string]string) {
 			fmt.Println("form data:", info)
 			p.Write("form data:")

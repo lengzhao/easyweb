@@ -1,5 +1,7 @@
 package e
 
+import "github.com/lengzhao/easyweb"
+
 type InputType string
 
 const (
@@ -87,5 +89,12 @@ func (e *inputElement) Unrequired() *inputElement {
 
 func (e *inputElement) Hidden() *inputElement {
 	e.SetAttr("hidden", "true")
+	return e
+}
+
+func (e *inputElement) SetChangeCb(cb func(p easyweb.Page, id string, value string)) *inputElement {
+	e.children[1].SetCb("change", func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
+		cb(p, id, string(data))
+	})
 	return e
 }

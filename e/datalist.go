@@ -38,8 +38,13 @@ func (e *datalistElement) AddItem(value, text string) *datalistElement {
 }
 
 func (e *datalistElement) SetChangeCb(cb func(p easyweb.Page, id string, value string)) *datalistElement {
-	e.children[2].SetCb("change", func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
+	e.children[1].SetCb("change", func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
 		cb(p, id, string(data))
 	})
+	return e
+}
+
+func (e *datalistElement) Value(value string) *datalistElement {
+	e.children[1].SetAttr("value", value)
 	return e
 }

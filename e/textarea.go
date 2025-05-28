@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+
+	"github.com/lengzhao/easyweb"
 )
 
 type textareaElement struct {
@@ -50,5 +52,12 @@ func (e *textareaElement) AddText(text string) *textareaElement {
 	buff := new(bytes.Buffer)
 	template.HTMLEscape(buff, []byte(text))
 	e.children[1].SetText(e.children[1].GetText() + buff.String())
+	return e
+}
+
+func (e *textareaElement) SetChangeCb(cb func(p easyweb.Page, id string, value string)) *textareaElement {
+	e.children[1].SetCb("change", func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
+		cb(p, id, string(data))
+	})
 	return e
 }
