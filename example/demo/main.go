@@ -86,7 +86,7 @@ func main() {
 		radio := e.Radio("radio1").AddItem("name1", "text1").AddItem("name2", "text2").AddItem("name3", "text3").Inline().Select("name2")
 		selectItem := e.Select("select1").AddItem("s1", "s1").AddItem("s2", "s2").AddItem("s3", "s3").Select("s2")
 		datalist := e.Datalist("datalist", "Datalist")
-		datalist.AddItem("value1", "value2", "San Francisco", "New York")
+		datalist.AddValues("value1", "value2", "San Francisco", "New York")
 		form := e.Form(func(p easyweb.Page, id string, info map[string]string) {
 			fmt.Println("form data:", info)
 			p.Write("form data:")

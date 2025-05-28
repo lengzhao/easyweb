@@ -10,8 +10,9 @@ import (
 
 type formElement struct {
 	HtmlToken
-	cb     func(p easyweb.Page, id string, info map[string]string)
-	fileCb func(p easyweb.Page, id string, data []byte)
+	cb           func(p easyweb.Page, id string, info map[string]string)
+	fileCb       func(p easyweb.Page, id string, data []byte)
+	resetAfterCb bool
 }
 
 var _ IElement = &formElement{}
@@ -31,6 +32,7 @@ func Form(cb func(p easyweb.Page, id string, info map[string]string)) *formEleme
 	if cb != nil {
 		out.SetCb("submit", out.eventCb)
 	}
+	out.resetAfterCb = true
 	return &out
 }
 
@@ -44,7 +46,9 @@ func (b *formElement) eventCb(p easyweb.Page, id string, dataType easyweb.CbData
 	if b.cb == nil {
 		return
 	}
-	p.Replace(b)
+	if b.resetAfterCb {
+		p.Replace(b)
+	}
 	info := make(map[string]string)
 	err := json.Unmarshal(data, &info)
 	if err != nil {
@@ -106,5 +110,10 @@ func (b *formElement) SetButtonText(text string) *formElement {
 		ht.SetText(text)
 		return fmt.Errorf("finish")
 	})
+	return b
+}
+
+func (b *formElement) ResetAfterCb(on bool) *formElement {
+	b.resetAfterCb = on
 	return b
 }
