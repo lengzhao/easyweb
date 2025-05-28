@@ -4,6 +4,8 @@ type linkElement struct {
 	HtmlToken
 }
 
+var _ IElement = &linkElement{}
+
 func Link(text, url string) *linkElement {
 	var out linkElement
 	out.parseText(`<a href="` + url + `">` + text + `</a>`)

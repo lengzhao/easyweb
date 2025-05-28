@@ -6,6 +6,8 @@ type datalistElement struct {
 	HtmlToken
 }
 
+var _ IElement = &datalistElement{}
+
 func Datalist(name, text string) *datalistElement {
 	out := datalistElement{}
 	did := getID()

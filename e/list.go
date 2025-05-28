@@ -6,6 +6,8 @@ type listElement struct {
 	HtmlToken
 }
 
+var _ IElement = &listElement{}
+
 func List(in ...any) *listElement {
 	var out listElement
 	out.parseText(`<ul class="list-group"></ul>`)
