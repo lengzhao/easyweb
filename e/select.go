@@ -1,6 +1,10 @@
 package e
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/lengzhao/easyweb"
+)
 
 type selectElement struct {
 	HtmlToken
@@ -68,5 +72,12 @@ func (e *selectElement) SetSize(size uint) *selectElement {
 	} else {
 		e.SetAttr("size", "")
 	}
+	return e
+}
+
+func (e *selectElement) SetChangeCb(cb func(p easyweb.Page, id string, value string)) *selectElement {
+	e.SetCb("change", func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
+		cb(p, id, string(data))
+	})
 	return e
 }

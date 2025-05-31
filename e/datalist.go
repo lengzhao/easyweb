@@ -48,3 +48,8 @@ func (e *datalistElement) Value(value string) *datalistElement {
 	e.children[1].SetAttr("value", value)
 	return e
 }
+
+func (e *datalistElement) Unrequired() *datalistElement {
+	e.children[1].SetAttr("required", "")
+	return e
+}
