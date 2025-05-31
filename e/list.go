@@ -42,3 +42,18 @@ func (b *listElement) AddItems(in ...any) *listElement {
 	}
 	return b
 }
+
+func Array2List(in ...any) *listElement {
+	out := List()
+	for _, v := range in {
+		switch it := v.(type) {
+		case []any:
+			out.AddItems(Array2List(it...))
+		case map[string]any:
+			out.AddItems(Map2Table(0, it))
+		default:
+			out.AddItems(v)
+		}
+	}
+	return out
+}

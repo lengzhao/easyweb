@@ -31,13 +31,22 @@ func main() {
 			"First":  "Mark",
 			"Last":   "Otto",
 			"Handle": "@mdo",
-			"Others": []any{"Jacob", "Thornton", "@fat", "Larry", "the Bird", "@twitter"},
+			"Others": []any{"Jacob", "Thornton", "@fat", "Larry", "the Bird", "@twitter", map[string]any{
+				"First":  "Mark",
+				"Last":   "Otto",
+				"Handle": "@mdo",
+			}},
 			"Map": map[string]any{
 				"First":  "Mark",
 				"Last":   "Otto",
 				"Handle": "@mdo",
 			},
 		}))
+		page.Write(e.AnyView([]any{"Jacob", "Thornton", "@fat", "Larry", "the Bird", "@twitter", map[string]any{
+			"First":  "Mark",
+			"Last":   "Otto",
+			"Handle": "@mdo",
+		}}))
 	}, easyweb.DefaultPagePath...)
 	http.ListenAndServe(":8182", nil)
 }

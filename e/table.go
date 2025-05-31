@@ -112,7 +112,7 @@ func Map2Table(keyWidth int, in map[string]any) *tableElement {
 		item := in[k]
 		switch val := item.(type) {
 		case []any:
-			element := List(val...).SetAttr("class", "list-group list-group-flush")
+			element := Array2List(val...)
 			t.AddLine([]any{k, element})
 		case map[string]any:
 			t.AddLine([]any{k, Map2Table(keyWidth, val).HiddenHead(true)})
