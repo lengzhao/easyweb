@@ -16,6 +16,7 @@
 </head>
 
 <body>
+    <p>EasyWeb</p>
     <div class="container" style="white-space: pre-line;" id="dynamic_container_id">
     </div>
 
@@ -37,7 +38,7 @@
         // 定时发送心跳包
         setInterval(function () {
             if (ws.readyState == WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: "heartbeat" }));
+                ws.send(JSON.stringify({ type: "ping" }));
             } else {
                 console.log("web socket is not open, try to reconnect");
                 ws = new WebSocket(wsUrl);
@@ -62,12 +63,6 @@
                     g.setAttribute("type", "text/css");
                     g.setAttribute("href", obj.msg);
                     $("head").append(g);
-                    break
-                case "event":
-                    bindEvent(obj.msg, obj.id);
-                    break
-                case "off":
-                    $("#" + obj.id).off(obj.msg)
                     break
                 case "eval":
                     eval(obj.msg);
@@ -101,87 +96,60 @@
             }
         };
 
-        // send heartbeat every 3 seconds
-        setInterval(function () {
-            if (ws.readyState == WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: "heartbeat" }));
-            } else {
-                ws = new WebSocket(wsUrl);
-                ws.onopen = function (event) {
-                    location.reload();
+        // 默认监听所有input事件
+        $(document).on('input', 'input', function() {
+            var val = $(this).val()
+            var id = $(this).attr('id')
+            console.log("input:", id, val)
+            var info = { type: "input", msg: val, id: id }
+            ws.send(JSON.stringify(info));
+        });
+
+        // 默认监听所有button点击事件
+        $(document).on('click', 'button', function() {
+            var text = $(this).text()
+            var id = $(this).attr('id')
+            console.log("click:", id, text)
+            var info = { type:"click", msg: text, id: id }
+            ws.send(JSON.stringify(info));
+        });
+
+        // 默认监听所有select变化事件
+        $(document).on('change', 'select', function() {
+            var val = $(this).val()
+            var id = $(this).attr('id')
+            console.log("change:", id, val)
+            var info = { type: "change", msg: val, id: id }
+            ws.send(JSON.stringify(info));
+        });
+
+        // 默认监听所有form提交事件
+        $(document).on('submit', 'form', function(event) {
+            event.preventDefault();
+            const form = $(this);
+            const id = form.attr('id');
+            const data = new FormData(event.target);
+            const value = Object.fromEntries(data.entries());
+            var files = [];
+            for (let x in value) {
+                if (value[x] instanceof File) {
+                    f = value[x];
+                    files.push(f);
+                    value[x] = f.name + ":" + f.size;
                 }
             }
-        }, 3000);
-
-        function bindEvent(typ, id) {
-            console.log("bindEvent:", typ, id)
-            switch (typ) {
-                case "input":
-                    $("#" + id).on("input", function () {
-                        var val = $(this).val()
-                        if (val.length == 0) {
-                            val = $(this).children("input").val()
-                        }
-                        console.log("input:",id, val)
-                        var info = { type: typ, msg: val, id: id }
-                        ws.send(JSON.stringify(info));
-                    });
-                    break;
-                case "button":
-                case "click":
-                    $("#" + id).click(function () {
-                        var info = { type:"click", msg:  $(this).text(), id: id }
-                        console.log("click:", info)
-                        ws.send(JSON.stringify(info));
-                    });
-                    break
-                case "change":
-                    $("#" + id).on( "change", function () {
-                        var val = $(this).val()
-                        if (val.length == 0) {
-                            val = $(this).children("option").val()
-                        }
-                        var info = { type: "change", msg: val, id: id }
-                        console.log("change:", info)
-                        ws.send(JSON.stringify(info));
-                    });
-                    break
-                case "submit":
-                case "form":
-                    $("#" + id).submit(function (event) {
-                        event.preventDefault();
-                        const data = new FormData(event.target);
-                        const value = Object.fromEntries(data.entries());
-                        var files = [];
-                        for (let x in value) {
-                            if (value[x] instanceof File) {
-                                f = value[x];
-                                files.push(f);
-                                info = {}
-                                value[x] = f.name + ":" + f.size;
-                            }
-                        }
-                        console.log("form:", id, value)
-                        var info = { type: "form", msg: JSON.stringify(value), id: id }
-                        // send form data
-                        ws.send(JSON.stringify(info));
-                        for (let f of files) {
-                            // send file info and data
-                            ws.send(str2ab("file:" + id + ":" + f.name + ":" + f.size + ":"))
-                            sendFile(f);
-                        }
-                        return false;
-                    });
-                    break
-                default:
-                    $("#" + id).on(typ, function () {
-                        console.log("event:", typ, id)
-                        var info = { type: typ, msg: $(this).text(), id: id }
-                        ws.send(JSON.stringify(info));
-                    });
-                    break;
+            console.log("form:", id, value)
+            var info = { type: "form", msg: JSON.stringify(value), id: id }
+            // send form data
+            ws.send(JSON.stringify(info));
+            for (let f of files) {
+                // send file info and data
+                ws.send(str2ab("file:" + id + ":" + f.name + ":" + f.size + ":"))
+                sendFile(f);
             }
-        }
+            return false;
+        });
+
         function sendFile(file) {
             var reader = new FileReader();
             var rawData = new ArrayBuffer();

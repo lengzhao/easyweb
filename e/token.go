@@ -19,8 +19,7 @@ type IElement interface {
 	//set Attribute, if v=="",will remove it
 	SetAttr(k, v string) IElement
 	SetCb(typ string, cb ICallback) IElement
-	AfterElementLoadedFromFramwork(p easyweb.Page)
-	MessageCallbackFromFramwork(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) bool
+	MessageCallbackFromFramwork(session easyweb.Session, id string, dataType easyweb.CbDataType, data []byte) bool
 	Traverse(parent IElement, cb ITraverseCb) error
 	Add(in ...IElement) IElement
 	SetChild(child ...IElement) IElement
@@ -28,11 +27,12 @@ type IElement interface {
 	Copy() IElement
 	GetText() string
 	SetText(text string) IElement
-	Refresh(p easyweb.Page) error
+	Refresh(p easyweb.Session) error
 	HtmlTag() string
+	AfterLoaded(easyweb.IEventRegister)
 }
 
-type ICallback func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte)
+type ICallback func(p easyweb.Session, id string, dataType easyweb.CbDataType, data []byte)
 
 type HtmlToken struct {
 	Info        html.Token
@@ -222,22 +222,6 @@ func (n *HtmlToken) SetCb(typ string, cb ICallback) IElement {
 	return n
 }
 
-func (n *HtmlToken) AfterElementLoadedFromFramwork(p easyweb.Page) {
-	// fmt.Println("try regist event:", n.GetAttr("id"), n.Info.Data, n.cb)
-	if n.cb != nil {
-		if n.eventKey == "" {
-			n.eventKey = n.GetID()
-		}
-		p.RegistEvent(n.eventKey, n.eventType, n)
-	}
-	for _, child := range n.children {
-		if child == nil {
-			continue
-		}
-		child.AfterElementLoadedFromFramwork(p)
-	}
-}
-
 func getEventType2(in string) string {
 	switch in {
 	case "form":
@@ -253,10 +237,26 @@ func getEventType2(in string) string {
 	}
 }
 
-func (n HtmlToken) MessageCallbackFromFramwork(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) bool {
+func (n *HtmlToken) AfterLoaded(r easyweb.IEventRegister) {
+	// fmt.Println("try regist event:", n.GetAttr("id"), n.Info.Data, n.cb)
+	if n.cb != nil {
+		if n.eventKey == "" {
+			n.eventKey = n.GetID()
+		}
+		r.RegistEvent(n.eventKey, n.eventType, n)
+	}
+	for _, child := range n.children {
+		if child == nil {
+			continue
+		}
+		child.AfterLoaded(r)
+	}
+}
+
+func (n HtmlToken) MessageCallbackFromFramwork(session easyweb.Session, id string, dataType easyweb.CbDataType, data []byte) bool {
 	if id == n.eventKey {
 		if n.cb != nil {
-			n.cb(p, id, dataType, data)
+			n.cb(session, id, dataType, data)
 		}
 		return true
 	}
@@ -264,7 +264,7 @@ func (n HtmlToken) MessageCallbackFromFramwork(p easyweb.Page, id string, dataTy
 		if child == nil {
 			continue
 		}
-		if child.MessageCallbackFromFramwork(p, id, dataType, data) {
+		if child.MessageCallbackFromFramwork(session, id, dataType, data) {
 			return true
 		}
 	}
@@ -382,7 +382,7 @@ func getID() string {
 	return fmt.Sprintf("eid%04d", val)
 }
 
-func (n *HtmlToken) Refresh(p easyweb.Page) error {
+func (n *HtmlToken) Refresh(p easyweb.Session) error {
 	// fmt.Println("try regist event:", n.GetAttr("id"), n.Info.Data, n.cb)
 	id := n.GetID()
 	if id == "" {

@@ -75,8 +75,8 @@ func (e *selectElement) SetSize(size uint) *selectElement {
 	return e
 }
 
-func (e *selectElement) SetChangeCb(cb func(p easyweb.Page, id string, value string)) *selectElement {
-	e.SetCb("change", func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
+func (e *selectElement) SetChangeCb(cb func(p easyweb.Session, id string, value string)) *selectElement {
+	e.SetCb("change", func(p easyweb.Session, id string, dataType easyweb.CbDataType, data []byte) {
 		cb(p, id, string(data))
 	})
 	return e

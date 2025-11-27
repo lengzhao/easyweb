@@ -55,8 +55,8 @@ func (e *textareaElement) AddText(text string) *textareaElement {
 	return e
 }
 
-func (e *textareaElement) SetChangeCb(cb func(p easyweb.Page, id string, value string)) *textareaElement {
-	e.children[1].SetCb("change", func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
+func (e *textareaElement) SetChangeCb(cb func(p easyweb.Session, id string, value string)) *textareaElement {
+	e.children[1].SetCb("change", func(p easyweb.Session, id string, dataType easyweb.CbDataType, data []byte) {
 		cb(p, id, string(data))
 	})
 	return e

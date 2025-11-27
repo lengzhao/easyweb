@@ -19,11 +19,11 @@ func main() {
 			{"Larry", "the Bird"},
 		})
 		page.Write(table)
-		page.Write(e.Button("UpdateTable", func(p easyweb.Page, id string) {
+		page.Write(e.Button("UpdateTable", func(p easyweb.Session, id string) {
 			table.AddValue([][]any{
 				{"Mark", "Otto", "@mdo"},
 			})
-			table.Refresh(page)
+			table.Refresh(p)
 		}))
 
 		page.Write("<h1>Map Table</h1>")

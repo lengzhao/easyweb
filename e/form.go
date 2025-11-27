@@ -10,14 +10,14 @@ import (
 
 type formElement struct {
 	HtmlToken
-	cb           func(p easyweb.Page, id string, info map[string]string)
-	fileCb       func(p easyweb.Page, id string, data []byte)
+	cb           func(p easyweb.Session, id string, info map[string]string)
+	fileCb       func(p easyweb.Session, id string, data []byte)
 	resetAfterCb bool
 }
 
 var _ IElement = &formElement{}
 
-func Form(cb func(p easyweb.Page, id string, info map[string]string)) *formElement {
+func Form(cb func(p easyweb.Session, id string, info map[string]string)) *formElement {
 	var out formElement
 	out.parseText(`<form>
 		<div>
@@ -36,7 +36,7 @@ func Form(cb func(p easyweb.Page, id string, info map[string]string)) *formEleme
 	return &out
 }
 
-func (b *formElement) eventCb(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
+func (b *formElement) eventCb(p easyweb.Session, id string, dataType easyweb.CbDataType, data []byte) {
 	if dataType == easyweb.CbDataTypeBinary {
 		if b.fileCb != nil {
 			b.fileCb(p, id, data)
@@ -67,7 +67,7 @@ func (b *formElement) Action(action, enctype string) *formElement {
 	return b
 }
 
-func (b *formElement) SetFileCb(cb func(p easyweb.Page, id string, data []byte)) *formElement {
+func (b *formElement) SetFileCb(cb func(p easyweb.Session, id string, data []byte)) *formElement {
 	b.fileCb = cb
 	if cb != nil {
 		b.SetCb("submit", b.eventCb)

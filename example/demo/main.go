@@ -17,7 +17,7 @@ func main() {
 		navbar.AddItem("Demo", "#")
 		navbar.AddItem("Link", "#")
 		navbar.AddItem("Action", "#")
-		navbar.SetSearchCb(func(p easyweb.Page, value string) {
+		navbar.SetSearchCb(func(p easyweb.Session, value string) {
 			fmt.Println("search:", value)
 		})
 		page.Write(navbar)
@@ -44,21 +44,21 @@ func main() {
 		tabs.AddItem("Input", box)
 
 		var count int
-		row := e.Box(e.Button("Click", func(p easyweb.Page, id string) {
+		row := e.Box(e.Button("Click", func(p easyweb.Session, id string) {
 			fmt.Println("button click001:", id)
 			p.Write("button click:" + fmt.Sprint(count))
 			p.Write(time.Now().String())
 		}))
 		row.Add(e.Link("Link ...", "#"))
 		dropdown := e.Dropdown("Dropdown001").AddLink("Link2 ...", "#")
-		dropdown.AddButton("button3", func(p easyweb.Page, id string) {
+		dropdown.AddButton("button3", func(p easyweb.Session, id string) {
 			p.Write("button3 click:" + id + time.Now().String())
 		})
-		dropdown.AddButton("button4", func(p easyweb.Page, id string) {
+		dropdown.AddButton("button4", func(p easyweb.Session, id string) {
 			p.Write("button4 click:" + id + time.Now().String())
 		})
 		row.Add(dropdown)
-		pag := e.Pagination([]string{"<<", "1", "2", "3", "4", "5", ">>"}, func(p easyweb.Page, id, item string) {
+		pag := e.Pagination([]string{"<<", "1", "2", "3", "4", "5", ">>"}, func(p easyweb.Session, id, item string) {
 			fmt.Println("pagination:", id, item)
 		}).Active("2")
 		row.Add(pag)
@@ -88,7 +88,7 @@ func main() {
 		datalist := e.Datalist("datalist", "Datalist")
 		datalist.AddValues("value1", "value2", "San Francisco", "New York")
 		datalist.AddItem("new_value1", "label of item")
-		form := e.Form(func(p easyweb.Page, id string, info map[string]string) {
+		form := e.Form(func(p easyweb.Session, id string, info map[string]string) {
 			fmt.Println("form data:", info)
 			p.Write("form data:")
 			p.Write(info)
@@ -96,24 +96,24 @@ func main() {
 		tabs.AddItem("Form", form)
 
 		box3 := e.Row()
-		box3.Add(e.Button("Click", func(p easyweb.Page, id string) {
+		box3.Add(e.Button("Click", func(p easyweb.Session, id string) {
 			p.Write("button click:" + id + time.Now().String())
 		})).Add(e.MustParseHtml(`<br/>`))
 		label := e.Label("Click Label")
-		label.SetCb("click", func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
+		label.SetCb("click", func(p easyweb.Session, id string, dataType easyweb.CbDataType, data []byte) {
 			p.Write("label click:" + id + time.Now().String())
 		})
 		box3.Add(label).Add(e.MustParseHtml(`<br/>`))
-		box3.Add(e.Button("RunJs From Server", func(p easyweb.Page, id string) {
+		box3.Add(e.Button("RunJs From Server", func(p easyweb.Session, id string) {
 			p.RunJs(`console.log("hello world. 123456")`)
 			p.Write(`run js:console.log("hello world. 123456")` + time.Now().String())
 
 		})).Add(e.MustParseHtml(`<br/>`))
-		box3.Add(e.Button("Off Event(unbind self)", func(p easyweb.Page, id string) {
+		box3.Add(e.Button("Off Event(unbind self)", func(p easyweb.Session, id string) {
 			p.Write(`event off:` + time.Now().String())
 			p.RegistEvent(id, "click", nil)
 		})).Add(e.MustParseHtml(`<br/>`))
-		box3.Add(e.Button("Color Change(setAttribute from server)", func(p easyweb.Page, id string) {
+		box3.Add(e.Button("Color Change(setAttribute from server)", func(p easyweb.Session, id string) {
 			p.SetAttr(id, "class", "btn btn-success")
 			p.Write(`Color Change to btn-success`)
 		}))

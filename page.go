@@ -3,54 +3,48 @@ package easyweb
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
+	"log"
 
-	"github.com/gorilla/websocket"
 	"github.com/lengzhao/easyweb/util"
 )
 
 var _ Page = &easyPage{}
 
-func newPage(conn *websocket.Conn) *easyPage {
+func newPage() *easyPage {
 	var page easyPage
-	page.conn = conn
 	page.callback = make(map[string]eventMsgData)
-	page.msgChan = make(chan any, 10)
-	page.closed = make(chan int)
-	page.env = make(map[string]any)
-	page.watchEnv = make(map[string]func(value any))
 	return &page
 }
 
 func (p *easyPage) Title(title string) Page {
 	id := util.GetCallerID(util.LevelParent)
 	msg := toClientMsgData{id, "title", title}
-	p.sendMsg(msg)
+	p.updatePageData(msg)
 	return p
 }
 
 func (p *easyPage) AddJs(js string) Page {
 	id := util.GetCallerID(util.LevelParent)
 	msg := toClientMsgData{id, "js", js}
-	p.sendMsg(msg)
+	p.updatePageData(msg)
 	return p
 }
 
 func (p *easyPage) RunJs(js string) Page {
 	id := util.GetCallerID(util.LevelParent)
 	msg := toClientMsgData{id, "eval", js}
-	p.sendMsg(msg)
+	p.updatePageData(msg)
 	return p
 }
 
 func (p *easyPage) GetPeer() string {
-	return p.conn.RemoteAddr().String()
+	return ""
 }
 
 func (p *easyPage) AddCss(css string) Page {
 	id := util.GetCallerID(util.LevelParent)
 	msg := toClientMsgData{id, "css", css}
-	p.sendMsg(msg)
+	p.updatePageData(msg)
 	return p
 }
 
@@ -72,10 +66,12 @@ func (p *easyPage) WriteWithID(id string, e any) string {
 	if id == "" {
 		id = util.GetCallerID(util.LevelParent)
 	}
+
 	msg := toClientMsgData{id, "", fmt.Sprint(e)}
-	p.sendMsg(msg)
-	if evt, ok := e.(IAfterLoaded); ok {
-		evt.AfterElementLoadedFromFramwork(p)
+	p.updatePageData(msg)
+
+	if e, ok := e.(IAfterLoaded); ok {
+		e.AfterLoaded(p)
 	}
 	return id
 }
@@ -86,16 +82,13 @@ func (p *easyPage) Replace(e IGetID) string {
 		return ""
 	}
 	msg := toClientMsgData{id, "replace", fmt.Sprint(e)}
-	p.sendMsg(msg)
-	if evt, ok := e.(IAfterLoaded); ok {
-		evt.AfterElementLoadedFromFramwork(p)
-	}
+	p.updatePageData(msg)
 	return id
 }
 
 func (p *easyPage) Delete(id string) {
 	msg := toClientMsgData{id, "", ""}
-	p.sendMsg(msg)
+	p.updatePageData(msg)
 }
 
 type attrInfo struct {
@@ -108,7 +101,7 @@ func (p *easyPage) SetAttr(id, key, value string) string {
 	info := attrInfo{Key: key, Value: value}
 	data, _ := json.Marshal(info)
 	msg := toClientMsgData{id, "attr", string(data)}
-	p.sendMsg(msg)
+	p.updatePageData(msg)
 	return id
 }
 
@@ -117,126 +110,45 @@ func (p *easyPage) RegistEvent(id, typ string, cb IMessageCb) {
 	if id == "" || typ == "" {
 		return
 	}
-	// 1. add event callback(server side)
-	cbMsg := eventMsgData{}
-	cbMsg.ID = id
-	cbMsg.Event = cb
-	p.sendMsg(cbMsg)
-	// 2. add client event(jquery will handle the event)
-	if cb != nil {
-		toClient := toClientMsgData{id, "event", typ}
-		p.sendMsg(toClient)
-	} else {
-		toClient := toClientMsgData{id, "off", typ}
-		p.sendMsg(toClient)
-	}
+	log.Println("page.RegistEvent", id, typ, cb)
+	p.callback[id] = eventMsgData{ID: id, Event: cb}
 }
 
-func (p *easyPage) sendMsg(msg any) {
-	select {
-	case <-p.closed:
-	case p.msgChan <- msg:
-	}
-}
-
-func (p *easyPage) Close() {
-	select {
-	case <-p.closed:
-	default:
-		p.conn.Close()
-	}
-}
-
-func (p *easyPage) WaitUntilClosed() {
-	<-p.closed
-}
-
-func (p *easyPage) SetEnv(key string, value any) {
-	p.mu.Lock()
-	p.env[key] = value
-	cb := p.watchEnv[key]
-	p.mu.Unlock()
-	if cb != nil {
-		cb(value)
-	}
-}
-
-func (p *easyPage) GetEnv(key string) (value any) {
-	p.mu.Lock()
-	value = p.env[key]
-	p.mu.Unlock()
-	return
-}
-
-func (p *easyPage) WatchEnv(key string, cb func(value any)) error {
+// 更新页面数据
+func (p *easyPage) updatePageData(msg any) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if p.watchEnv[key] != nil {
-		return fmt.Errorf("exist callback")
+
+	log.Println("updatePageData", msg)
+	// 根据消息类型更新页面数据
+	switch m := msg.(type) {
+	case toClientMsgData:
+		// 处理客户端消息数据
+		// 将更新操作添加到pageData数组中
+		p.elements = append(p.elements, m)
+	case eventMsgData:
+		p.callback[m.ID] = m
 	}
-	p.watchEnv[key] = cb
-	return nil
 }
 
-func encode(v interface{}) []byte {
-	buff := new(strings.Builder)
-	enc := json.NewEncoder(buff)
-	enc.SetEscapeHTML(false)
-	enc.Encode(v)
-	return []byte(buff.String())
+func (p *easyPage) MessageCallbackFromFramwork(session Session, id string, dataType CbDataType, data []byte) bool {
+	// 查找对应的事件处理器
+	p.mu.Lock()
+	cb, exists := p.callback[id]
+	p.mu.Unlock()
+
+	log.Println("Page.MessageCallbackFromFramwork", id, exists, dataType, string(data))
+	// 如果找到了事件处理器且不为nil，调用它
+	if exists && cb.Event != nil {
+		return cb.Event.MessageCallbackFromFramwork(session, id, dataType, data)
+	}
+
+	// 没有找到匹配的事件处理器
+	return false
 }
 
-func (p *easyPage) processMsg() {
-	for {
-		select {
-		case <-p.closed:
-			return
-		case data, ok := <-p.msgChan:
-			if !ok {
-				continue
-			}
-			switch msg := data.(type) {
-			case toClientMsgData:
-				if msg.ID == "" {
-					continue
-				}
-				p.conn.WriteMessage(websocket.TextMessage, encode(msg))
-				if msg.Msg == "" {
-					delete(p.callback, msg.ID)
-				}
-			case fromClientMsgData:
-				cb := p.callback[msg.ID]
-				if cb.Event != nil {
-					go func(id string, dataType CbDataType, data []byte) {
-						defer func() {
-							if r := recover(); r != nil {
-								fmt.Println("Recovered", r)
-							}
-						}()
-						cb.Event.MessageCallbackFromFramwork(p, msg.ID, dataType, data)
-					}(msg.ID, CbDataTypeString, []byte(msg.Msg))
-				}
-			case fileMsgData:
-				cb := p.callback[msg.ID]
-				if cb.Event != nil {
-					go func(id string, dataType CbDataType, data []byte) {
-						defer func() {
-							if r := recover(); r != nil {
-								fmt.Println("Recovered", r)
-							}
-						}()
-						cb.Event.MessageCallbackFromFramwork(p, msg.ID, dataType, data)
-					}(msg.ID, CbDataTypeBinary, msg.BinaryData)
-				}
-			case eventMsgData:
-				if msg.Event == nil {
-					delete(p.callback, msg.ID)
-				} else {
-					p.callback[msg.ID] = msg
-				}
-			default:
-				fmt.Println("unknown msg type:", msg)
-			}
-		}
+func (p *easyPage) PageLoaded(session Session) {
+	for _, msg := range p.elements {
+		session.Write(msg)
 	}
 }

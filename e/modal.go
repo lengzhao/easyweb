@@ -9,7 +9,7 @@ import (
 
 type modalElement struct {
 	HtmlToken
-	cb func(p easyweb.Page, id string, info map[string]string)
+	cb func(p easyweb.Session, id string, info map[string]string)
 }
 
 var _ IElement = &modalElement{}
@@ -41,7 +41,7 @@ func Modal(btnText, title string) *modalElement {
 	return &out
 }
 
-func FormModal(btnText, title string, cb func(p easyweb.Page, id string, info map[string]string)) *modalElement {
+func FormModal(btnText, title string, cb func(p easyweb.Session, id string, info map[string]string)) *modalElement {
 	out := modalElement{}
 	id := getID()
 	sid := getID()
@@ -81,7 +81,7 @@ func FormModal(btnText, title string, cb func(p easyweb.Page, id string, info ma
 	return &out
 }
 
-func (b *modalElement) eventCb(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
+func (b *modalElement) eventCb(p easyweb.Session, id string, dataType easyweb.CbDataType, data []byte) {
 	if b.cb == nil {
 		return
 	}

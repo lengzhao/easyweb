@@ -9,12 +9,12 @@ import (
 
 type paginationElement struct {
 	HtmlToken
-	pgCb func(p easyweb.Page, id, item string)
+	pgCb func(p easyweb.Session, id, item string)
 }
 
 var _ IElement = &paginationElement{}
 
-func Pagination(items []string, cb func(p easyweb.Page, id, item string)) *paginationElement {
+func Pagination(items []string, cb func(p easyweb.Session, id, item string)) *paginationElement {
 	out := paginationElement{}
 	out.parseText(`<nav aria-label="Page navigation example">
 	<ul class="pagination justify-content-center">
@@ -39,7 +39,7 @@ func Pagination(items []string, cb func(p easyweb.Page, id, item string)) *pagin
 	return &out
 }
 
-func (e *paginationElement) eventCallback(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
+func (e *paginationElement) eventCallback(p easyweb.Session, id string, dataType easyweb.CbDataType, data []byte) {
 	log.Println("eventCallback", id, dataType, string(data))
 	e.pgCb(p, e.GetID(), string(data))
 }

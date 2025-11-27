@@ -2,8 +2,6 @@ package easyweb
 
 import (
 	"sync"
-
-	"github.com/gorilla/websocket"
 )
 
 type Page interface {
@@ -16,15 +14,38 @@ type Page interface {
 	Replace(IGetID) string
 	Delete(string)
 	SetAttr(id, key, value string) string
+	// regist element event after loaded
+	RegistEvent(id, typ string, cb IMessageCb)
+	PageLoaded(session Session)
+	MessageCallbackFromFramwork(session Session, id string, dataType CbDataType, data []byte) bool
+}
+
+type Session interface {
+	Title(string) Session
+	AddJs(string) Session
+	AddCss(string) Session
+	RunJs(js string) Session
+	Write(any) string
+	WriteWithID(string, any) string
+	Replace(IGetID) string
+	Delete(string)
+	SetAttr(id, key, value string) string
 	GetPeer() string
 	Close()
 	WaitUntilClosed()
 	// regist element event after loaded
 	RegistEvent(id, typ string, cb IMessageCb)
-
 	SetEnv(key string, value any)
 	GetEnv(key string) any
 	WatchEnv(key string, cb func(value any)) error
+}
+
+type IEventRegister interface {
+	RegistEvent(id, typ string, cb IMessageCb)
+}
+
+type IAfterLoaded interface {
+	AfterLoaded(r IEventRegister)
 }
 
 type toClientMsgData struct {
@@ -53,12 +74,10 @@ type eventMsgData struct {
 
 type easyPage struct {
 	callback map[string]eventMsgData
-	conn     *websocket.Conn
-	closed   chan int
-	msgChan  chan any
-	mu       sync.Mutex
-	env      map[string]any
-	watchEnv map[string]func(value any)
+	// 页面数据存储
+	elements []toClientMsgData
+	// 用于同步访问pageData
+	mu sync.Mutex
 }
 
 type IContainerID interface {
@@ -66,7 +85,7 @@ type IContainerID interface {
 }
 
 type IMessageCb interface {
-	MessageCallbackFromFramwork(page Page, id string, dataType CbDataType, data []byte) bool
+	MessageCallbackFromFramwork(session Session, id string, dataType CbDataType, data []byte) bool
 }
 
 type PageFunc func(page Page)
@@ -77,10 +96,6 @@ const (
 	CbDataTypeString CbDataType = iota
 	CbDataTypeBinary
 )
-
-type IAfterLoaded interface {
-	AfterElementLoadedFromFramwork(p Page)
-}
 
 const (
 	ENV_COOKIES     = "e_cookies"     // http.Request.Cookies()

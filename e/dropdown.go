@@ -48,7 +48,7 @@ func (b *dropdownElement) AddLink(text, url string) *dropdownElement {
 	})
 	return b
 }
-func (b *dropdownElement) AddButton(text string, cb func(p easyweb.Page, id string)) *dropdownElement {
+func (b *dropdownElement) AddButton(text string, cb func(p easyweb.Session, id string)) *dropdownElement {
 	b.Traverse(nil, func(parent, ht IElement) error {
 		if ht.HtmlTag() != "ul" {
 			return nil

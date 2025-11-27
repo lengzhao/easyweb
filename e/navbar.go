@@ -68,7 +68,7 @@ func (b *navbarElement) AddCustomItem(it IElement) *navbarElement {
 	return b
 }
 
-func (b *navbarElement) SetSearchCb(cb func(p easyweb.Page, value string)) *navbarElement {
+func (b *navbarElement) SetSearchCb(cb func(p easyweb.Session, value string)) *navbarElement {
 	id := getID()
 	b.Traverse(nil, func(parent, ht IElement) error {
 		if ht.HtmlTag() != "form" {
@@ -80,7 +80,7 @@ func (b *navbarElement) SetSearchCb(cb func(p easyweb.Page, value string)) *navb
 			child[0].SetAttr("name", id)
 		}
 		ht.SetAttr("hidden", "")
-		ht.SetCb("submit", func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
+		ht.SetCb("submit", func(p easyweb.Session, id string, dataType easyweb.CbDataType, data []byte) {
 			info := make(map[string]string)
 			json.Unmarshal(data, &info)
 			cb(p, info[id])

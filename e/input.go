@@ -92,9 +92,18 @@ func (e *inputElement) Hidden() *inputElement {
 	return e
 }
 
-func (e *inputElement) SetChangeCb(cb func(p easyweb.Page, id string, value string)) *inputElement {
-	e.children[1].SetCb("change", func(p easyweb.Page, id string, dataType easyweb.CbDataType, data []byte) {
+func (e *inputElement) SetChangeCb(cb func(p easyweb.Session, id string, value string)) *inputElement {
+	e.children[1].SetCb("change", func(p easyweb.Session, id string, dataType easyweb.CbDataType, data []byte) {
 		cb(p, id, string(data))
 	})
+	return e
+}
+
+func (e *inputElement) SetChangeSessionCb(cb func(session easyweb.Session, id string, value string)) *inputElement {
+	if htmlToken, ok := e.children[1].(*HtmlToken); ok {
+		htmlToken.SetCb("change", func(session easyweb.Session, id string, dataType easyweb.CbDataType, data []byte) {
+			cb(session, id, string(data))
+		})
+	}
 	return e
 }
